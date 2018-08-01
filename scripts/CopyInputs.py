@@ -2,6 +2,7 @@ import sys
 import glob
 import os
 import shutil
+import subprocess
 
 def copy_imsim_inputs(inPrefix, outPrefix):
     cwd = os.getcwd()
@@ -16,7 +17,7 @@ def copy_imsim_inputs(inPrefix, outPrefix):
         icl = glob.glob(inDir + 'phosim_cat_*.txt')
         for ic in icl:
             shutil.copy(ic, outDir)
-        shutil.copytree(inDir + 'Dynamic', outDir + 'Dynamic')
+        subprocess.call(['cp','-dR',inDir+'Dynamic',outDir])
     return
 
 if __name__ == '__main__':
