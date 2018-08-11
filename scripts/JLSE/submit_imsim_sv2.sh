@@ -16,7 +16,7 @@ mkdir -p ${prefix}
 
 for i in `seq 0 5`;
 do
-    time singularity run $image ${ic[$filter]} ${prefix}/${i}/work ${prefix}/${i}/fits 1 1 1 1> ${prefix}/stdout.${i}.txt 2> ${prefix}/stderr.${i}.txt &
+    time singularity run $image ${ic[$i]} ${prefix}/${i}/work ${prefix}/${i}/fits 1 1 1 1> ${prefix}/stdout.${i}.txt 2> ${prefix}/stderr.${i}.txt &
 done
 
 wait
