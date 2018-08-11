@@ -7,7 +7,7 @@ import os.path
 import galsim
 import desc.imsim
 
-def run_imsim(workdir, instcat, outdir, processes, fidelity, single_sensor, file_id=None):
+def run_imsim(instcat, workdir, outdir, processes, fidelity, single_sensor, file_id=None):
     cwd = os.getcwd()
 
     instcat = os.path.abspath(instcat)
@@ -56,10 +56,10 @@ def run_imsim(workdir, instcat, outdir, processes, fidelity, single_sensor, file
 # SINGLE SENSOR OPTION?
 if __name__=='__main__':
     if len(sys.argv) < 7:
-        print('USAGE: %s <workdir> <instcat> <outdir> <processes> <high_fidelity_q> <single_sensor_q> [file_id]' % sys.argv[0])
+        print('USAGE: %s <instcat> <workdir> <outdir> <processes> <high_fidelity_q> <single_sensor_q> [file_id]' % sys.argv[0])
         sys.exit(-1)
-    workdir = sys.argv[1]
-    instcat = sys.argv[2]
+    instcat = sys.argv[1]
+    workdir = sys.argv[2]
     outdir = sys.argv[3]
     processes = int(sys.argv[4])
     fidelity = int(sys.argv[5])
@@ -68,4 +68,4 @@ if __name__=='__main__':
         file_id = sys.argv[7]
     else:
         file_id = None
-    run_imsim(workdir, instcat, outdir, processes, fidelity, single_sensor, file_id)
+    run_imsim(instcat, workdir, outdir, processes, fidelity, single_sensor, file_id)
