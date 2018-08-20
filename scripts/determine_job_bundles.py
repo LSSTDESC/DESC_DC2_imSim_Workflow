@@ -20,15 +20,12 @@ def get_object_entries(visit_object, chip_name):
     # could probably write this as one line? Maybe bad coding style.
     return object_list
 
-@python_app
 def determine_sensor_jobs(instcat_file):
     """Determine which sensors in a given visit need imSim work done
        and return the list of chips that you want to sim on.
        INPUT: instcat_file (string)
        OUTPUT: chip_sim_list (lists)
     """
-    # TODO: FEELS like I should pass the chip name somewhere forward, so that
-    # we know which jobs have run.
 
     # we'll need a list of all 189 chips here, to loop over later.
     chip_list = ['R:0,1 S:0,0', 'R:0,1 S:0,1', 'R:0,1 S:0,2', 'R:0,1 S:1,0', 'R:0,1 S:1,1', 'R:0,1 S:1,2',
@@ -101,7 +98,7 @@ def determine_bundling(instcat_list):
     # This is going to be filled with a list of chips that need to be run
     # for every single visit.
     visit_job_queue = []
-    [visit_job_queue.append(determine_sensor_jobs(instcat_file).result())
+    [visit_job_queue.append(determine_sensor_jobs(instcat_file))
      for instcat_file in instcat_list]
 
     # Each entry should now be list of sensors that need to be run and this point.
