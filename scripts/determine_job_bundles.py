@@ -61,20 +61,12 @@ def determine_sensor_jobs(instcat_file):
     # instantiate the InstCatTrimmer object.
     visit_object = imsim.trim.InstCatTrimmer(instcat_file)
 
-    # create an empty list to fill with lists.
-    sensor_job_queue = []
 
-    # list comprehension to generate the sensor job queue for a single visit.
-    [sensor_job_queue.append(get_object_entries(visit_object, chip_name))
-     for chip_name in chip_list]
+    sensor_job_queue = [get_object_entries(visit_object, chip_name) for chip_name in chip_list]
 
     # We optimally want to prune the list so we don't pass empty around.
-    chip_sim_list = []
-    [chip_sim_list.append(chip_list[i] for i in range(0, len(chip_list)) if sensor_job_queue[i])]
 
-    # Commented out code in case we want to pass aroudn the sensor job queue instead of
-    # calculating it twice.
-    #sensor_job_queue[:] = [item for item in sensor_job_queue if item]
+    chip_sim_list = [chip_list[i] for i in range(0, len(chip_list)) if sensor_job_queue[i]]
 
     return chip_sim_list
 
@@ -92,23 +84,19 @@ def determine_bundling(instcat_list):
     # but we can probably think of some more clever way to parse over this
     # for a directory.
 
-    cwd = os.getcwd()
-
     instcat_list = [os.path.abspath(instcat_file) for instcat_file in instcat_list]
 
     # This is going to be filled with a list of chips that need to be run
     # for every single visit.
-    visit_job_queue = []
-    [visit_job_queue.append(determine_sensor_jobs(instcat_file))
-     for instcat_file in instcat_list]
+    visit_job_queue = [determine_sensor_jobs(instcat_file) for instcat_file in instcat_list]
+
 
     # Each entry should now be list of sensors that need to be run and this point.
     # Our new problem is now basically the bin packing problem. Pack each job together
     # in a minimal number of bins.
 
     # Start by getting the number of threads we will need for each visit.
-    thread_counts = []
-    [thread_counts.append(sum(job_queue)) for job_queue in visit_job_queue]
+    thread_counts = [len(job_queue) for job_queue in visit_job_queue]
 
     # The trick here is now that we probably want to take the list, sort it
     # and then use FFD to fit them into bins. The trick is sorting, but maintaining
