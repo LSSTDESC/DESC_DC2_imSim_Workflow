@@ -3,12 +3,6 @@ import parsl
 import desc.imsim
 import numpy as np
 
-from parsl.app.app import python_app
-from parsl.configs.local_threads import config
-
-parsl.load(config)
-
-@python_app
 def get_object_entries(visit_object, chip_name):
     """Get the number of objects on the chip and return a list of
        them. If under a minimum set by the instance catalog, return
@@ -68,7 +62,7 @@ def determine_sensor_jobs(instcat_file):
     sensor_job_queue = []
 
     # list comprehension to generate the sensor job queue for a single visit.
-    [sensor_job_queue.append(get_object_entries(visit_object, chip_name).result())
+    [sensor_job_queue.append(get_object_entries(visit_object, chip_name))
      for chip_name in chip_list]
 
     # We optimally want to prune the list so we don't pass empty around.
