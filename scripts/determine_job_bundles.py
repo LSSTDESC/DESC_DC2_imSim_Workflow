@@ -3,7 +3,7 @@ import parsl
 import desc.imsim
 import numpy as np
 
-from parsl.app.app import bash_app, python_app
+from parsl.app.app import python_app
 from parsl.configs.local_threads import config
 
 parsl.load(config)
