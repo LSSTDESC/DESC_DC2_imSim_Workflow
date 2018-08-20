@@ -1,5 +1,4 @@
 # Standard section importing imsim and preparing parsl for use.
-import parsl
 import desc.imsim
 import numpy as np
 
