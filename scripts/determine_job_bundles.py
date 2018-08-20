@@ -1,6 +1,10 @@
 # Standard section importing imsim and preparing parsl for use.
-import desc.imsim
+import desc.imsim as imsim
 import numpy as np
+import timeit
+import sys
+import os
+import os.path
 
 def get_object_entries(visit_object, chip_name):
     """Get the number of objects on the chip and return a list of
@@ -66,7 +70,7 @@ def determine_sensor_jobs(instcat_file):
 
     # We optimally want to prune the list so we don't pass empty around.
     chip_sim_list = []
-    [chip_sim_list.append(chip_list[i] for i in range(0, len(chip_list)) if sensor_job_queue[i]]
+    [chip_sim_list.append(chip_list[i] for i in range(0, len(chip_list)) if sensor_job_queue[i])]
 
     # Commented out code in case we want to pass aroudn the sensor job queue instead of
     # calculating it twice.
@@ -87,6 +91,10 @@ def determine_bundling(instcat_list):
     # We're going to assume we can pass in a list of instcat files for now,
     # but we can probably think of some more clever way to parse over this
     # for a directory.
+
+    cwd = os.getcwd()
+
+    instcat_list = [os.path.abspath(instcat_file) for instcat_file in instcat_list]
 
     # This is going to be filled with a list of chips that need to be run
     # for every single visit.
@@ -165,3 +173,12 @@ def determine_bundling(instcat_list):
     # boxes.
 
     return bundle_list
+
+def time_determine_bundling(input_list):
+    import timeit
+    _determine_bundling = determine_bundling
+    instcat_list = input_list
+
+    t = timeit.Timer('_determine_bundling(instcat_list)', globals=locals())
+
+    return t
