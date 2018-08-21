@@ -61,14 +61,10 @@ def determine_sensor_jobs(instcat_file):
     # instantiate the InstCatTrimmer object.
     visit_object = imsim.trim.InstCatTrimmer(instcat_file)
 
-
-    sensor_job_queue = [get_object_entries(visit_object, chip_name) for chip_name in chip_list]
-
+    # Calculate number of objects to sim on each sensor.
     # We optimally want to prune the list so we don't pass empty around.
-
-    chip_sim_list = [chip_list[i] for i in range(0, len(chip_list)) if sensor_job_queue[i]]
-
-    return chip_sim_list
+    object_lists = {chip_name: get_object_entries(visit_object, chip_name) for chip_name in chip_list}
+    return [chip_name for chip_name in object_lists if object_lists[chip_name]]
 
 def determine_bundling(instcat_list):
     """Determine how many sensors each visit takes and determines which
@@ -106,7 +102,10 @@ def determine_bundling(instcat_list):
     bin_counter = 0
 
     # open up a list to store our lists.
-    bundle_list = [[] for thread_count in thread_counts]
+    #bundle_list = [[] for thread_count in thread_counts]
+ 
+    # Instead open up Dict for storing our lists in.
+    bundle_list = dict()
 
     # First; if the threads in a job are greater than the max number of threads/node,
     # we should give 64 threads a node of their own.
@@ -117,7 +116,11 @@ def determine_bundling(instcat_list):
             temp = []
             for tempi in range(max_threads_node):
                 temp.append(visit_job_queue[i].pop())
-            bundle_list[i].append([bin_counter,temp,instcat_list[i]])
+
+            nodedict='node'+str(bin_counter)
+            bundle_list[nodedict]=[(instcat_list[i],temp)]
+
+            #bundle_list[i].append([bin_counter,temp,instcat_list[i]])
             bin_counter += 1
 
     # adjust so we don't look into bins we've already stuffed full.
@@ -144,7 +147,11 @@ def determine_bundling(instcat_list):
                         temp = []
                         for tempi in range(thread_counts[idx]):
                             temp.append(visit_job_queue[idx].pop())
-                        bundle_list[idx].append([j+bin_adjust,temp,instcat_list[idx]])
+
+                        nodedict = 'node'+str(j+bin_adjust)
+                        bundle_list[nodedict].append((instcat_list[idx], temp))
+
+                        #bundle_list[idx].append([j+bin_adjust,temp,instcat_list[idx]])
                         found_fit = 1   
         # If it does not fit in an existing bin, add a new bin!
         if found_fit == 0:
@@ -153,7 +160,11 @@ def determine_bundling(instcat_list):
             temp = []
             for tempi in range(thread_counts[idx]):
                 temp.append(visit_job_queue[idx].pop())
-            bundle_list[idx].append([bin_counter+bin_adjust,temp,instcat_list[idx]])
+
+            nodedict = 'node'+str(bin_counter+bin_adjust)
+            bundle_list[nodedict] = [(instcat_list[idx], temp)]
+
+            #bundle_list[idx].append([bin_counter+bin_adjust,temp,instcat_list[idx]])
             bin_counter+=1
 
     # Note, this is NOT an optimal algorithm. There is likely to be some underpacked nodes,
