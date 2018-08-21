@@ -1,11 +1,11 @@
 # Standard section importing imsim and preparing parsl for use.
 import desc.imsim as imsim
 import numpy as np
-import timeit
 import sys
 import os
 import os.path
 
+# set this way for being used in Parsl in the future.
 def get_object_entries(visit_object, chip_name):
     """Get the number of objects on the chip and return a list of
        them. If under a minimum set by the instance catalog, return
@@ -14,7 +14,6 @@ def get_object_entries(visit_object, chip_name):
        OUTPUT: object_list (list)
     """
     object_list = visit_object.get_object_entries(chip_name)
-    # could probably write this as one line? Maybe bad coding style.
     return object_list
 
 def determine_sensor_jobs(instcat_file):
@@ -98,12 +97,9 @@ def determine_bundling(instcat_list):
     # and then use FFD to fit them into bins. The trick is sorting, but maintaining
     # necessary information about the object. So we really want a sorted index.
 
-    max_threads_node = 63 # hard coded for now
+    max_threads_node = 63 # hard coded for now, straightforward to add as parameter.
     bin_counter = 0
 
-    # open up a list to store our lists.
-    #bundle_list = [[] for thread_count in thread_counts]
- 
     # Instead open up Dict for storing our lists in.
     bundle_list = dict()
 
@@ -120,7 +116,6 @@ def determine_bundling(instcat_list):
             nodedict='node'+str(bin_counter)
             bundle_list[nodedict]=[(instcat_list[i],temp)]
 
-            #bundle_list[i].append([bin_counter,temp,instcat_list[i]])
             bin_counter += 1
 
     # adjust so we don't look into bins we've already stuffed full.
@@ -165,12 +160,3 @@ def determine_bundling(instcat_list):
     # boxes.
 
     return bundle_list
-
-def time_determine_bundling(input_list):
-    import timeit
-    _determine_bundling = determine_bundling
-    instcat_list = input_list
-
-    t = timeit.Timer('_determine_bundling(instcat_list)', globals=locals())
-
-    return t
