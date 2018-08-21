@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import os
 import os.path
+import simplejson
 
 # set this way for being used in Parsl in the future.
 def get_object_entries(visit_object, chip_name):
@@ -65,14 +66,14 @@ def determine_sensor_jobs(instcat_file):
     object_lists = {chip_name: get_object_entries(visit_object, chip_name) for chip_name in chip_list}
     return [chip_name for chip_name in object_lists if object_lists[chip_name]]
 
-def determine_bundling(instcat_list):
+def determine_bundling(instcat_list, outfile):
     """Determine how many sensors each visit takes and determines which
        jobs should be bundled together. Needs a list of instcat files,
        and hard codes some infrastucture based parameters. Return a dictionary
        where each key is a node ID and has an entry tuple that contains both the
-       associated instance catalog and sensors to run.
+       associated instance catalog and sensors to run. It also saves a json of the bundle_list.
  
-       INPUT: instcat_list (list)
+       INPUT: instcat_list (list), outfile (file destination)
        OUTPUT: bundle_list (list)
     """
     # We're going to assume we can pass in a list of instcat files for now,
@@ -159,4 +160,8 @@ def determine_bundling(instcat_list):
     # as the algorithm does NOT split groups once they are below 64 threads to fit them into
     # boxes.
 
+    f = open(outfile, 'w')
+    simplejson.dump(bundle_list, f)
+    f = close()
+import timeit
     return bundle_list
