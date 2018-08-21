@@ -68,9 +68,9 @@ def determine_sensor_jobs(instcat_file):
 def determine_bundling(instcat_list):
     """Determine how many sensors each visit takes and determines which
        jobs should be bundled together. Needs a list of instcat files,
-       as well as information about the HPC infrastructure. Returns a list of
-       chips to run on for each visit and an optimal bundling of them for
-       distributing them across nodes, as well as the instance catalog.
+       and hard codes some infrastucture based parameters. Return a dictionary
+       where each key is a node ID and has an entry tuple that contains both the
+       associated instance catalog and sensors to run.
  
        INPUT: instcat_list (list)
        OUTPUT: bundle_list (list)
