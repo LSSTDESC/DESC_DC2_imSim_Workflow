@@ -137,34 +137,30 @@ def determine_bundling(instcat_list):
     # Go through items from largest to smallest.
     for idx in sort_idx:
         found_fit = 0
-        # If it fits in an existing bin, add it.
-        if open_bins:
+        if len(visit_job_queue[idx]) < 1:
+            found_fit = 1
+        if (open_bins and found_fit == 0):
             for j in range(0, len(open_bins)):
                 if open_bins[j]+thread_counts[idx] <= max_threads_node:
                     if num_fit[j]+1 < max_fit:
                         open_bins[j]+=thread_counts[idx]
                         num_fit[j]+=1
                         temp = []
+                        if thread_counts[idx] > len(visit_job_queue[idx]):
+                            print(thread_counts[idx], visit_job_queue[idx])
                         for tempi in range(thread_counts[idx]):
                             temp.append(visit_job_queue[idx].pop())
-
                         nodedict = 'node'+str(j+bin_adjust)
                         bundle_list[nodedict].append((instcat_list[idx], temp))
-
-                        #bundle_list[idx].append([j+bin_adjust,temp,instcat_list[idx]])
                         found_fit = 1   
-        # If it does not fit in an existing bin, add a new bin!
         if found_fit == 0:
             open_bins.append(thread_counts[idx])
             num_fit.append(1)
             temp = []
             for tempi in range(thread_counts[idx]):
                 temp.append(visit_job_queue[idx].pop())
-
             nodedict = 'node'+str(bin_counter+bin_adjust)
             bundle_list[nodedict] = [(instcat_list[idx], temp)]
-
-            #bundle_list[idx].append([bin_counter+bin_adjust,temp,instcat_list[idx]])
             bin_counter+=1
 
     # Note, this is NOT an optimal algorithm. There is likely to be some underpacked nodes,
