@@ -3,6 +3,7 @@
 import sys
 import os
 import os.path
+import json
 
 import galsim
 import desc.imsim
@@ -20,9 +21,30 @@ def sensor_subset(size, index):
     hi = (index+1)*size
     return all_sensor_list[lo:hi]
 
-def run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset_index, file_id=None):
+def get_sensor_list(node_bundles, node_id, visit_index):
+    with open(node_bundles, 'r') as fd:
+        bundles = json.load(fd)
+    return bundles[node_id][visit_index]
+
+def run_imsim(instcat, workdir, outdir, processes, fidelity,
+              subset_size, subset_index, file_id=None, node_bundles=None,
+              node_id='node0', visit_index=0):
+
     cwd = os.getcwd()
 
+    if node_bundles is None:
+        if instcat is None:
+            raise RuntimeError("Either an instcat or node_bundles file"
+                               "must be provided.")
+        sensor_list = sensor_subset(subset_size, subset_index)
+    else:
+        instcat, sensor_list = get_sensor_list(node_bundles, node_id,
+                                               visit_index)
+
+    print(instcat)
+    print(sensor_list)
+    if True:
+        sys.exit(0)
     instcat = os.path.abspath(instcat)
     outdir = os.path.abspath(outdir)
     workdir = os.path.abspath(workdir)
@@ -43,8 +65,6 @@ def run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset
         psf = desc.imsim.make_psf('DoubleGaussian', obs_md)
         apply_sensor_model = False
 
-    sensor_list = sensor_subset(subset_size, subset_index)
-
     os.chdir(workdir)
 
     image_simulator \
@@ -64,20 +84,39 @@ def run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset
 
 # SINGLE SENSOR OPTION?
 if __name__=='__main__':
-    if len(sys.argv) < 8:
-        print('USAGE: %s <instcat> <workdir> <outdir> <processes> <high_fidelity_q> <subset_size> <subset_index> [file_id]' % sys.argv[0])
-        print('all sensors: subset_size=189, subset_index=0')
-        print('R:2,2 S:1,1: subset_size=1,   subset_index=94')
-        sys.exit(-1)
-    instcat = sys.argv[1]
-    workdir = sys.argv[2]
-    outdir = sys.argv[3]
-    processes = int(sys.argv[4])
-    fidelity = int(sys.argv[5])
-    subset_size = int(sys.argv[6])
-    subset_index = int(sys.argv[7])
-    if len(sys.argv) > 8:
-        file_id = sys.argv[8]
-    else:
-        file_id = None
-    run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset_index, file_id)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--instcat', type=str, default=None,
+                        help='Instance catalog file')
+    parser.add_argument('--workdir', type=str, default='.',
+                        help='working directory')
+    parser.add_argument('--outdir', type=str, default='.',
+                        help='output directory')
+    parser.add_argument('--processes', type=int, default=1,
+                        help='number of processes')
+    parser.add_argument('--low_fidelity', default=False, action='store_true',
+                        help='Run in low fidelity mode')
+    parser.add_argument('--subset_size', type=int, default=1,
+                        help='subset size of full focalplane sensors'
+                        'to simulate')
+    parser.add_argument('--subset_index', type=int, default=94,
+                        help='starting index of subset full focalplane'
+                        'sensors to simulate')
+    parser.add_argument('--file_id', type=str, default=None,
+                        help='file_id to use for checkpoint files. '
+                        'If None, then checkpointing will not be used.')
+    parser.add_argument('--node_bundles', type=str, default=None,
+                        help='json file with visit/chip list bundles.'
+                        'If not None, this overrides the instcat argument'
+                        'and the--subset_* parameters')
+    parser.add_argument('--node_id', type=str, default='node0',
+                        help='Node ID of desired visit/sensors lists.')
+    parser.add_argument('--visit_index', type=int, default=0,
+                        help='Index of the visit/sensor list tuple in the'
+                        'desired node bundle')
+    args = parser.parse_args()
+
+    run_imsim(args.instcat, args.workdir, args.outdir, args.processes,
+              args.low_fidelity, args.subset_size, args.subset_index,
+              args.file_id, node_bundles=args.node_bundles,
+              node_id=args.node_id, visit_index=args.visit_index)
