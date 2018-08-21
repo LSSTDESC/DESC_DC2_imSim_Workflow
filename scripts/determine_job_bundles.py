@@ -163,5 +163,4 @@ def determine_bundling(instcat_list, outfile):
     f = open(outfile, 'w')
     simplejson.dump(bundle_list, f)
     f = close()
-import timeit
     return bundle_list
