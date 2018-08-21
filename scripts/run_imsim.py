@@ -41,10 +41,6 @@ def run_imsim(instcat, workdir, outdir, processes, fidelity,
         instcat, sensor_list = get_sensor_list(node_bundles, node_id,
                                                visit_index)
 
-    print(instcat)
-    print(sensor_list)
-    if True:
-        sys.exit(0)
     instcat = os.path.abspath(instcat)
     outdir = os.path.abspath(outdir)
     workdir = os.path.abspath(workdir)
