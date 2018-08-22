@@ -2,9 +2,8 @@
 import desc.imsim as imsim
 import numpy as np
 import sys
-import os
 import os.path
-import simplejson
+import json
 
 # set this way for being used in Parsl in the future.
 def get_object_entries(visit_object, chip_name):
@@ -160,7 +159,7 @@ def determine_bundling(instcat_list, outfile):
     # as the algorithm does NOT split groups once they are below 64 threads to fit them into
     # boxes.
 
-    f = open(outfile, 'w')
-    simplejson.dump(bundle_list, f)
-    f = close()
+    with open(outfile, 'w') as fp:
+        json.dump(bundle_list, fp)
+
     return bundle_list
