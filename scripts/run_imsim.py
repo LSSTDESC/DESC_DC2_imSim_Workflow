@@ -3,6 +3,7 @@
 import sys
 import os
 import os.path
+import json
 
 import galsim
 import desc.imsim
@@ -20,30 +21,50 @@ def sensor_subset(size, index):
     hi = (index+1)*size
     return all_sensor_list[lo:hi]
 
-def run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset_index, file_id=None):
+def get_sensor_list(bundle_lists, node_id, visit_index):
+    with open(bundle_lists, 'r') as fd:
+        bundles = json.load(fd)
+    return bundles[node_id][visit_index]
+
+def run_imsim(instcat, workdir, outdir, processes, low_fidelity,
+              subset_size, subset_index, file_id=None, bundle_lists=None,
+              node_id='node0', visit_index=0, log_level='INFO'):
+
+    logger = desc.imsim.get_logger(log_level, 'run_imsim')
+
     cwd = os.getcwd()
 
+    if bundle_lists is None:
+        if instcat is None:
+            raise RuntimeError("Either an instcat or bundle_lists file"
+                               "must be provided.")
+        sensor_list = sensor_subset(subset_size, subset_index)
+    else:
+        instcat, sensor_list = get_sensor_list(bundle_lists, node_id,
+                                               visit_index)
+
+    logger.info(instcat)
+    logger.info(sensor_list)
     instcat = os.path.abspath(instcat)
     outdir = os.path.abspath(outdir)
     workdir = os.path.abspath(workdir)
 
-    os.makedirs(workdir)
-    os.makedirs(outdir)
+    os.makedirs(workdir, exist_ok=True)
+    os.makedirs(outdir, exist_ok=True)
 
-    log_level = 'INFO'
     commands = desc.imsim.metadata_from_file(instcat)
     obs_md = desc.imsim.phosim_obs_metadata(commands)
     seed = commands['seed']
 
-    if fidelity > 0:
+    if low_fidelity:
+        logger.info("running in low fidelity mode")
+        psf = desc.imsim.make_psf('DoubleGaussian', obs_md)
+        apply_sensor_model = False
+    else:
+        logger.info("running in high fidelity mode")
         rng = galsim.UniformDeviate(seed)
         psf = desc.imsim.make_psf('Atmospheric', obs_md, rng=rng)
         apply_sensor_model = True
-    else:
-        psf = desc.imsim.make_psf('DoubleGaussian', obs_md)
-        apply_sensor_model = False
-
-    sensor_list = sensor_subset(subset_size, subset_index)
 
     os.chdir(workdir)
 
@@ -64,20 +85,44 @@ def run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset
 
 # SINGLE SENSOR OPTION?
 if __name__=='__main__':
-    if len(sys.argv) < 8:
-        print('USAGE: %s <instcat> <workdir> <outdir> <processes> <high_fidelity_q> <subset_size> <subset_index> [file_id]' % sys.argv[0])
-        print('all sensors: subset_size=189, subset_index=0')
-        print('R:2,2 S:1,1: subset_size=1,   subset_index=94')
-        sys.exit(-1)
-    instcat = sys.argv[1]
-    workdir = sys.argv[2]
-    outdir = sys.argv[3]
-    processes = int(sys.argv[4])
-    fidelity = int(sys.argv[5])
-    subset_size = int(sys.argv[6])
-    subset_index = int(sys.argv[7])
-    if len(sys.argv) > 8:
-        file_id = sys.argv[8]
-    else:
-        file_id = None
-    run_imsim(instcat, workdir, outdir, processes, fidelity, subset_size, subset_index, file_id)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--instcat', type=str, default=None,
+                        help='Instance catalog file')
+    parser.add_argument('--workdir', type=str, default='.',
+                        help='working directory')
+    parser.add_argument('--outdir', type=str, default='.',
+                        help='output directory')
+    parser.add_argument('--processes', type=int, default=1,
+                        help='number of processes. Default: 1')
+    parser.add_argument('--low_fidelity', default=False, action='store_true',
+                        help='Run in low fidelity mode.')
+    parser.add_argument('--subset_size', type=int, default=1,
+                        help='subset size of full focalplane sensors'
+                        'to simulate. Default: 1')
+    parser.add_argument('--subset_index', type=int, default=94,
+                        help='starting index of subset full focalplane'
+                        'sensors to simulate. Default: 94')
+    parser.add_argument('--file_id', type=str, default=None,
+                        help='file_id to use for checkpoint files. '
+                        'If None, then checkpointing will not be used.')
+    parser.add_argument('--bundle_lists', type=str, default=None,
+                        help='json file with visit/chip list bundles. '
+                        'If not None, this overrides the instcat argument'
+                        'and the --subset_* parameters')
+    parser.add_argument('--node_id', type=str, default='node0',
+                        help='Node ID of desired visit/sensors lists.'
+                        'Default: node0')
+    parser.add_argument('--visit_index', type=int, default=0,
+                        help='Index of the visit/sensor list tuple in the'
+                        'desired node bundle. Default: 0')
+    parser.add_argument('--log_level', type=str, default='INFO',
+                        choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'],
+                        help='Logging level. Default: INFO')
+    args = parser.parse_args()
+
+    run_imsim(args.instcat, args.workdir, args.outdir, args.processes,
+              args.low_fidelity, args.subset_size, args.subset_index,
+              args.file_id, bundle_lists=args.bundle_lists,
+              node_id=args.node_id, visit_index=args.visit_index,
+              log_level=args.log_level)
