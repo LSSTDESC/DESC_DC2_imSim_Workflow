@@ -84,7 +84,7 @@ def determine_bundling(instcat_list, outfile):
     # This is going to be filled with a list of chips that need to be run
     # for every single visit.
     visit_job_queue = [determine_sensor_jobs(instcat_file) for instcat_file in instcat_list]
-
+    print(visit_job_queue)
 
     # Each entry should now be list of sensors that need to be run and this point.
     # Our new problem is now basically the bin packing problem. Pack each job together
