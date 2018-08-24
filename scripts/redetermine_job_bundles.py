@@ -5,7 +5,7 @@ import sys
 # takes two system arguments - input json and output json
 
 # Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
-with open(sysargv[1]) as json_input:
+with open(sys.argv[1]) as json_input:
     run_data = json.load(json_input)
 
 # Preprocessing step to recombine any two with the same instance catalogs.
@@ -19,8 +19,8 @@ for visit, sensors in run_data:
         temp_data[key] = sensors
 
 sample = []
-for key in temp_data.keys()
-    sample.append([key, temp_sample[key]])
+for key in temp_data.keys():
+    sample.append([key, temp_data[key]])
 
 # This produces something that my pipeline can easily take.
 thread_counts = [len(item[1]) for item in sample]
@@ -75,6 +75,6 @@ for idx in sort_idx:
         bundle_list[nodedict] = [((sample[idx])[0], temp)]
         bin_counter+=1
 
-with open(sysargv[2], 'w') as fp:
+with open(sys.argv[2], 'w') as fp:
     json.dump(bundle_list, fp)
 
