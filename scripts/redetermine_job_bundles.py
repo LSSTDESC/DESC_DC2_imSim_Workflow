@@ -2,7 +2,12 @@ import numpy as np
 import json
 import sys
 
-# takes two system arguments - input json and output json
+# takes two system arguments
+# argv[1] = file path to input .json file, dict with keys of instcat and list of
+# sensors
+#
+# argv[2] = file path and string name, upon which is appended a number + '.json'.
+# This generates a job bundle file for every single node.
 
 # modification to read in a JSON file consisting of a dict with keys of instcat
 # and list of sensors
@@ -83,6 +88,19 @@ for idx in sort_idx:
         bundle_list[nodedict] = [((sample[idx])[0], temp)]
         bin_counter+=1
 
-with open(sys.argv[2], 'w') as fp:
-    json.dump(bundle_list, fp)
+##################################
+# Commented out old output style #
+##################################
+#with open(sys.argv[2], 'w') as fp:
+#    json.dump(bundle_list, fp)
+##################################
 
+# prints one job bundle filke per node
+nodenum = 0
+for key in bundle_list.keys:
+    temp_bundle = dict()
+    temp_bundle['node0']=bundle_list[key]
+    with open(sys.argv[2]+str(nodenum)+'.json', 'w') as fp:
+        json.dump(temp_bundle, fp)
+    nodenum+=1
+ 
