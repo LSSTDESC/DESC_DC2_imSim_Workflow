@@ -4,19 +4,27 @@ import sys
 
 # takes two system arguments - input json and output json
 
-# Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
-with open(sys.argv[1]) as json_input:
-    run_data = json.load(json_input)
+# modification to read in a JSON file consisting of a dict with keys of instcat
+# and list of sensors
+with open(sys.argv[1] as json_input:
+    temp_data = json.load(json_input)
 
-# Preprocessing step to recombine any two with the same instance catalogs.
-temp_data = dict()
-for visit, sensors in run_data:
-    key = str(visit)
-    if key in temp_data:
-        for sensor in sensors:
-            temp_data[key].append(sensor)
-    else:
-        temp_data[key] = sensors
+
+# Commented out section for reading different format
+##########
+## Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
+#with open(sys.argv[1]) as json_input:
+#    run_data = json.load(json_input)
+## Preprocessing step to recombine any two with the same instance catalogs.
+#temp_data = dict()
+#for visit, sensors in run_data:
+#    key = str(visit)
+#    if key in temp_data:
+#        for sensor in sensors:
+#            temp_data[key].append(sensor)
+#    else:
+#        temp_data[key] = sensors
+##########
 
 sample = []
 for key in temp_data.keys():
