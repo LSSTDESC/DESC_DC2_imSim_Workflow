@@ -11,7 +11,7 @@ import sys
 
 # modification to read in a JSON file consisting of a dict with keys of instcat
 # and list of sensors
-with open(sys.argv[1] as json_input:
+with open(sys.argv[1]) as json_input:
     temp_data = json.load(json_input)
 
 
@@ -65,7 +65,7 @@ sort_idx = np.array(thread_counts).argsort()[::-1]
 
 for idx in sort_idx:
     found_fit = 0
-    if open_bins:
+    if (open_bins and thread_counts[idx]>0):
         for j in range(0, len(open_bins)):
             if found_fit == 0:
                 if open_bins[j]+thread_counts[idx] <= max_threads_node:
@@ -97,7 +97,7 @@ for idx in sort_idx:
 
 # prints one job bundle filke per node
 nodenum = 0
-for key in bundle_list.keys:
+for key in bundle_list.keys():
     temp_bundle = dict()
     temp_bundle['node0']=bundle_list[key]
     with open(sys.argv[2]+str(nodenum)+'.json', 'w') as fp:
