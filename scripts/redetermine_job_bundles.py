@@ -2,6 +2,11 @@ import numpy as np
 import json
 import sys
 
+# hard coded hardware limitations
+max_threads_node = 64
+max_fit = 5 # again, currently harded coded; keeps from running out of memory
+             # on a node due to too many visits.
+
 # takes two system arguments - input json and output json
 
 # Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
@@ -27,7 +32,6 @@ thread_counts = [len(item[1]) for item in sample]
 
 bundle_list = dict()
 
-max_threads_node = 64
 bin_counter = 0
 
 for i in range(0, len(thread_counts)):
@@ -44,8 +48,6 @@ bin_adjust = bin_counter
 bin_counter = 0
 open_bins = []
 num_fit = []
-max_fit = 10 # again, currently harded coded; keeps from running out of memory
-             # on a node due to too many visits.
 # Get sorted index of thread_counts to loop over.
 sort_idx = np.array(thread_counts).argsort()[::-1]
 
