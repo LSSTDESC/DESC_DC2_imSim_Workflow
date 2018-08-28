@@ -7,21 +7,28 @@ max_threads_node = 64
 max_fit = 5 # again, currently harded coded; keeps from running out of memory
              # on a node due to too many visits.
 
-# takes two system arguments - input json and output json
 
-# Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
+# modification to read in a JSON file consisting of a dict with keys of instcat
+# and list of sensors
 with open(sys.argv[1]) as json_input:
-    run_data = json.load(json_input)
+    temp_data = json.load(json_input)
 
-# Preprocessing step to recombine any two with the same instance catalogs.
-temp_data = dict()
-for visit, sensors in run_data:
-    key = str(visit)
-    if key in temp_data:
-        for sensor in sensors:
-            temp_data[key].append(sensor)
-    else:
-        temp_data[key] = sensors
+
+# Commented out section for reading different format
+##########
+## Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
+#with open(sys.argv[1]) as json_input:
+#    run_data = json.load(json_input)
+## Preprocessing step to recombine any two with the same instance catalogs.
+#temp_data = dict()
+#for visit, sensors in run_data:
+#    key = str(visit)
+#    if key in temp_data:
+#        for sensor in sensors:
+#            temp_data[key].append(sensor)
+#    else:
+#        temp_data[key] = sensors
+##########
 
 sample = []
 for key in temp_data.keys():
@@ -54,7 +61,7 @@ sort_idx = np.array(thread_counts).argsort()[::-1]
 
 for idx in sort_idx:
     found_fit = 0
-    if open_bins:
+    if (open_bins and thread_counts[idx]>0):
         for j in range(0, len(open_bins)):
             if found_fit == 0:
                 if open_bins[j]+thread_counts[idx] <= max_threads_node:
@@ -77,6 +84,19 @@ for idx in sort_idx:
         bundle_list[nodedict] = [((sample[idx])[0], temp)]
         bin_counter+=1
 
-with open(sys.argv[2], 'w') as fp:
-    json.dump(bundle_list, fp)
+##################################
+# Commented out old output style #
+##################################
+#with open(sys.argv[2], 'w') as fp:
+#    json.dump(bundle_list, fp)
+##################################
 
+# prints one job bundle filke per node
+nodenum = 0
+for key in bundle_list.keys():
+    temp_bundle = dict()
+    temp_bundle['node0']=bundle_list[key]
+    with open(sys.argv[2]+str(nodenum)+'.json', 'w') as fp:
+        json.dump(temp_bundle, fp)
+    nodenum+=1
+ 
