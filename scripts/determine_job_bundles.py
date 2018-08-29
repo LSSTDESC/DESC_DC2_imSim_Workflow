@@ -113,7 +113,7 @@ def determine_bundling(instcat_list, outfile):
                 temp.append(visit_job_queue[i].pop())
 
             nodedict='node'+str(bin_counter)
-            bundle_list[nodedict]=[(instcat_list[i],temp)]
+            bundle_list[nodedict]=[(instcat_list[i],temp[0],temp[1])]
 
             bin_counter += 1
 
@@ -142,7 +142,7 @@ def determine_bundling(instcat_list, outfile):
                             for tempi in range(thread_counts[idx]):
                                 temp.append(visit_job_queue[idx].pop())
                             nodedict = 'node'+str(j+bin_adjust)
-                            bundle_list[nodedict].append((instcat_list[idx], temp))
+                            bundle_list[nodedict].append((instcat_list[idx], temp[0], temp[1]))
                             found_fit = 1   
         if found_fit == 0:
             open_bins.append(thread_counts[idx])
@@ -151,7 +151,7 @@ def determine_bundling(instcat_list, outfile):
             for tempi in range(thread_counts[idx]):
                 temp.append(visit_job_queue[idx].pop())
             nodedict = 'node'+str(bin_counter+bin_adjust)
-            bundle_list[nodedict] = [(instcat_list[idx], temp)]
+            bundle_list[nodedict] = [(instcat_list[idx], temp[0], temp[1])]
             bin_counter+=1
 
     # Note, this is NOT an optimal algorithm. There is likely to be some underpacked nodes,
