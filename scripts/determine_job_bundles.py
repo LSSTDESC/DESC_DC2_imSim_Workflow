@@ -64,7 +64,7 @@ def determine_sensor_jobs(instcat_file):
     # We optimally want to prune the list so we don't pass empty around.
     object_lists = {chip_name: get_object_entries(visit_object, chip_name) for chip_name in chip_list}
     job_list = [chip_name for chip_name in object_lists if object_lists[chip_name]]
-    num_obj_list = [len(object_lists) for chip_name in object_lists if object_lists[chip_name]]
+    num_obj_list = [len(object_lists[chip_name]) for chip_name in object_lists if object_lists[chip_name]]
 
     return job_list, num_obj_list
 
