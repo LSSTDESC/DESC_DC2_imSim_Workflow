@@ -20,7 +20,7 @@ def determine_sensor_jobs(instcat_file):
     """Determine which sensors in a given visit need imSim work done
        and return the list of chips that you want to sim on.
        INPUT: instcat_file (string)
-       OUTPUT: jobs_list [chip name, number of objects]
+       OUTPUT: job_list, num_obj_list
     """
 
     # we'll need a list of all 189 chips here, to loop over later.
@@ -63,7 +63,10 @@ def determine_sensor_jobs(instcat_file):
     # Calculate number of objects to sim on each sensor.
     # We optimally want to prune the list so we don't pass empty around.
     object_lists = {chip_name: get_object_entries(visit_object, chip_name) for chip_name in chip_list}
-    return [[chip_name, len(object_lists[chip_name])] for chip_name in object_lists if object_lists[chip_name]]
+    job_list = [chip_name for chip_name in object_lists if object_lists[chip_name]]
+    num_obj_list = [len(object_lists) for chip_name in object_lists if object_lists[chip_name]]
+
+    return job_list, num_obj_list
 
 def determine_bundling(instcat_list, outfile):
     """Determine how many sensors each visit takes and determines which
@@ -90,7 +93,7 @@ def determine_bundling(instcat_list, outfile):
     # in a minimal number of bins.
 
     # Start by getting the number of threads we will need for each visit.
-    thread_counts = [len(job_queue) for job_queue in visit_job_queue]
+    thread_counts = [len(job_queue[0]) for job_queue in visit_job_queue]
 
     # The trick here is now that we probably want to take the list, sort it
     # and then use FFD to fit them into bins. The trick is sorting, but maintaining
