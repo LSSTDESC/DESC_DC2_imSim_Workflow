@@ -112,12 +112,14 @@ def determine_bundling(instcat_list, outfile):
     for i in range(0, len(thread_counts)):
         while thread_counts[i] >= max_threads_node:
             thread_counts[i] += -1*max_threads_node
-            temp = []
+            temp_sensor = []
+            temp_num = []
             for tempi in range(max_threads_node):
-                temp.append(visit_job_queue[i].pop())
+                temp_sensor.append((visit_job_queue[i])[0].pop())
+                temp_num.append((visit_job_queue[i])[1].pop())
 
             nodedict='node'+str(bin_counter)
-            bundle_list[nodedict]=[(instcat_list[i],temp[0],temp[1])]
+            bundle_list[nodedict]=[(instcat_list[i],temp_sensor,temp_num)]
 
             bin_counter += 1
 
@@ -142,20 +144,24 @@ def determine_bundling(instcat_list, outfile):
                         if num_fit[j]+1 < max_fit:
                             open_bins[j]+=thread_counts[idx]
                             num_fit[j]+=1
-                            temp = []
+                            temp_sensor = []
+                            temp_num = []
                             for tempi in range(thread_counts[idx]):
-                                temp.append(visit_job_queue[idx].pop())
+                                temp_sensor.append((visit_job_queue[idx])[0].pop())
+                                temp_num.append((visit_job_queue[idx])[1].pop())
                             nodedict = 'node'+str(j+bin_adjust)
-                            bundle_list[nodedict].append((instcat_list[idx], temp[0], temp[1]))
+                            bundle_list[nodedict].append((instcat_list[idx], temp_sensor, temp_num))
                             found_fit = 1   
         if found_fit == 0:
             open_bins.append(thread_counts[idx])
             num_fit.append(1)
-            temp = []
+            temp_sensor = []
+            temp_num = []
             for tempi in range(thread_counts[idx]):
-                temp.append(visit_job_queue[idx].pop())
+                temp_sensor.append((visit_job_queue[idx])[0].pop())
+                temp_num.append((visit_job_queue[idx])[1].pop())
             nodedict = 'node'+str(bin_counter+bin_adjust)
-            bundle_list[nodedict] = [(instcat_list[idx], temp[0], temp[1])]
+            bundle_list[nodedict] = [(instcat_list[idx], temp_sensor, temp_num)]
             bin_counter+=1
 
     # Note, this is NOT an optimal algorithm. There is likely to be some underpacked nodes,
