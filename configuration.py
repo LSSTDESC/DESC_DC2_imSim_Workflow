@@ -39,7 +39,7 @@ export OMP_NUM_THREADS=1"""
 
 
 
-config = Config(
+parsl_config = Config(
     executors=[
         MPIExecutor(
             label="parsl-mpix",
