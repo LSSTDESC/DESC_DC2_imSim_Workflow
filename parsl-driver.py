@@ -1,6 +1,8 @@
 
 import configuration
 
+import glob
+
 import parsl
 
 from parsl.app.app import bash_app
@@ -18,12 +20,6 @@ cfg_singularity_img = cfg_work_and_out_path + "ALCF_1.2.simg"
 
 cfg_singularity_url = "shub://benclifford/ALCF_1.2"
 
-#  test instance catalog - TO BE REPLACED BY GENERATED LIST
-cfg_inst_cat = "~benc/desc/benc.instcat/000025/instCat/phosim_cat_32678.txt"
-
-# for load testing, run this many times:
-cfg_repeated_runs = 5000
-
 # set to true to use fake short sleep instead of singularity
 cfg_fake = False
 
@@ -33,16 +29,21 @@ def cache_singularity_image(local_file, url):
 
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity_fake(work_out_dir_n: int, nthreads: int, pseudo_catalog: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str):
+def run_imsim_in_singularity_fake(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str):
     return "sleep 20s"
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity(work_out_dir_n: int, nthreads: int, pseudo_catalog: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str):
-    pathbase = "{}/run-{}-{}/".format(work_and_out_base, work_out_dir_n, pseudo_catalog)
+def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str):
+    pathbase = "{}/run/".format(work_and_out_base)
     outdir = pathbase + "out/"
     workdir = pathbase + "work/"
     return "singularity run {} --instcat {} --workdir {} --outdir {} --low_fidelity --subset_size 300 --subset_index 0 --file_id ckpt --processes {}".format(singularity_img_path, inst_cat, outdir, workdir, nthreads)
 
+
+print("listing instance catalogs")
+# This glob came from Jim Chiang
+instance_catalogs = glob.glob('/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/DC2-R1*/0*/instCat/phosim_cat*.txt')
+print("there are {} instance catalogs to process".format(len(instance_catalogs)))
 
 print("caching singularity image")
 
@@ -59,16 +60,17 @@ res = []
 
 
 
-for pseudo_catalog in range(0,cfg_repeated_runs):
-  print("launching a run")
+for instance_catalog in instance_catalogs:
+  print("launching a run for instance catalog {}".format(instance_catalog))
   if cfg_fake:
       p = run_imsim_in_singularity_fake
   else:
       p = run_imsim_in_singularity
-    
-  future = p(18, 63, pseudo_catalog, cfg_work_and_out_path, cfg_singularity_img, cfg_inst_cat)
-  print("launched a run")
-  res.append(future)
+  
+  # is 63 the optimal number? this is just based on rumours from slack 
+  future = p(63, cfg_work_and_out_path, cfg_singularity_img, instance_catalog)
+  print("launched a run for instance catalog {}")
+  futures.append(future)
 
 
 for f in res:
