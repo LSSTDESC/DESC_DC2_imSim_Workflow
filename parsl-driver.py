@@ -14,23 +14,29 @@ parsl.load(configuration.parsl_config)
 cfg_work_and_out_path = "~benc/desc/"
 
 # singularity image containing the ALCF_1.2i distro
-cfg_singularity_img = "~benc/desc2.0i/ALCF_1.2i/benclifford-ALCF.simg"
+cfg_singularity_img = cfg_work_and_out_path + "ALCF_1.2.simg"
+
+cfg_singularity_url = "shub://benclifford/ALCF_1.2"
 
 #  test instance catalog - TO BE REPLACED BY GENERATED LIST
 cfg_inst_cat = "~benc/desc/benc.instcat/000025/instCat/phosim_cat_32678.txt"
 
 # for load testing, run this many times:
-cfg_repeated_runs = 7
+cfg_repeated_runs = 5000
 
 # set to true to use fake short sleep instead of singularity
-cfg_fake = True
+cfg_fake = False
+
+@bash_app(executors=['submit-node'])
+def cache_singularity_image(local_file, url):
+    return "singularity build {} {}".format(local_file, url)
 
 
-@bash_app
+@bash_app(executors=['worker-nodes'])
 def run_imsim_in_singularity_fake(work_out_dir_n: int, nthreads: int, pseudo_catalog: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str):
     return "sleep 20s"
 
-@bash_app
+@bash_app(executors=['worker-nodes'])
 def run_imsim_in_singularity(work_out_dir_n: int, nthreads: int, pseudo_catalog: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str):
     pathbase = "{}/run-{}-{}/".format(work_and_out_base, work_out_dir_n, pseudo_catalog)
     outdir = pathbase + "out/"
@@ -38,9 +44,20 @@ def run_imsim_in_singularity(work_out_dir_n: int, nthreads: int, pseudo_catalog:
     return "singularity run {} --instcat {} --workdir {} --outdir {} --low_fidelity --subset_size 300 --subset_index 0 --file_id ckpt --processes {}".format(singularity_img_path, inst_cat, outdir, workdir, nthreads)
 
 
+print("caching singularity image")
+
+
+singularity_future = cache_singularity_image(cfg_singularity_img, "shub://benclifford/ALCF_1.2i")
+
+singularity_future.result()
+
+
 print("launching runs")
 
 res = []
+
+
+
 
 for pseudo_catalog in range(0,cfg_repeated_runs):
   print("launching a run")

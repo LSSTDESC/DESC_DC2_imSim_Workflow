@@ -3,6 +3,7 @@ from libsubmit.launchers import SimpleLauncher
 
 from parsl.config import Config
 from parsl.executors.mpix import MPIExecutor
+from parsl.executors.threads import ThreadPoolExecutor
 
 THETA_NODES=8
  # this should scale up to 802 in real life, or up to 8 or 16 in debug queue
@@ -37,12 +38,8 @@ ulimit -c unlimited
                                                                                                                                                                                                                                                
 export OMP_NUM_THREADS=1"""
 
-
-
-parsl_config = Config(
-    executors=[
-        MPIExecutor(
-            label="parsl-mpix",
+mpi_executor = MPIExecutor(
+            label="worker-nodes",
             jobs_q_url=JOB_URL,
             results_q_url=RESULT_URL,
             launch_cmd=launch_cmd,
@@ -59,6 +56,10 @@ parsl_config = Config(
                 cmd_timeout=60
             ),
         )
-    ],
+
+local_executor = ThreadPoolExecutor(max_threads=2, label="submit-node")
+
+parsl_config = Config(
+    executors=[ mpi_executor, local_executor ],
     strategy=None,
 )
