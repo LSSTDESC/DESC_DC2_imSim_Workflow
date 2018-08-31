@@ -2,37 +2,46 @@ import numpy as np
 import json
 import sys
 
+# Three system arguments input by default:
+infile = sys.argv[1]   # /path/to/json/inputfile of all jobs you haven't started
+waitpath = sys.argv[2] # /path/to/dir storing all your checkpointed job output
+outfile = sys.argv[3]  # /path/to/json/outfile for all jobs to now start.
+
+
 # hard coded hardware limitations
 max_threads_node = 64
-max_fit = 5 # again, currently harded coded; keeps from running out of memory
+max_fit = 10 # again, currently harded coded; keeps from running out of memory
              # on a node due to too many visits.
 
 
+####################################################
+# Commented out section for different reading format
+####################################################
 # modification to read in a JSON file consisting of a dict with keys of instcat
 # and list of sensors
-with open(sys.argv[1]) as json_input:
-    temp_data = json.load(json_input)
+#with open(infile) as json_input:
+#    temp_data = json.load(json_input)
+####################################################
 
-
-# Commented out section for reading different format
-##########
-## Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
-#with open(sys.argv[1]) as json_input:
-#    run_data = json.load(json_input)
-## Preprocessing step to recombine any two with the same instance catalogs.
-#temp_data = dict()
-#for visit, sensors in run_data:
-#    key = str(visit)
-#    if key in temp_data:
-#        for sensor in sensors:
-#            temp_data[key].append(sensor)
-#    else:
-#        temp_data[key] = sensors
-##########
+# Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
+with open(infile) as json_input:
+    run_data = json.load(json_input)
+#Preprocessing step to recombine any two with the same instance catalogs.
+temp_sensors = dict()
+temp_numobjs = dict()
+for visit, sensors, numobj in run_data:
+    key = str(visit)
+    if key in temp_sensors:
+        for sensor in sensors:
+            temp_sensors[key].append(sensor)
+            temp_numobjs[key].append(numobj)
+    else:
+        temp_sensors[key] = sensors
+        temp_numobjs[key] = numobj
 
 sample = []
-for key in temp_data.keys():
-    sample.append([key, temp_data[key]])
+for key in temp_sensors.keys():
+    sample.append([key, temp_sensors[key], temp_numobjs[key]])
 
 # This produces something that my pipeline can easily take.
 thread_counts = [len(item[1]) for item in sample]
@@ -84,19 +93,18 @@ for idx in sort_idx:
         bundle_list[nodedict] = [((sample[idx])[0], temp)]
         bin_counter+=1
 
-##################################
-# Commented out old output style #
-##################################
-#with open(sys.argv[2], 'w') as fp:
-#    json.dump(bundle_list, fp)
-##################################
+with open(outfile, 'w') as fp:
+    json.dump(bundle_list, fp)
 
-# prints one job bundle filke per node
-nodenum = 0
-for key in bundle_list.keys():
-    temp_bundle = dict()
-    temp_bundle['node0']=bundle_list[key]
-    with open(sys.argv[2]+str(nodenum)+'.json', 'w') as fp:
-        json.dump(temp_bundle, fp)
-    nodenum+=1
- 
+############################################
+# Commented out alternative outfile format #
+############################################
+## prints one job bundle file per node
+#nodenum = 0
+#for key in bundle_list.keys():
+#    temp_bundle = dict()
+#    temp_bundle['node0']=bundle_list[key]
+#    with open(sys.argv[2]+str(nodenum)+'.json', 'w') as fp:
+#        json.dump(temp_bundle, fp)
+#    nodenum+=1
+############################################ 
