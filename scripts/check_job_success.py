@@ -26,16 +26,25 @@ with open(infile) as fp:
 # and .ckpt files.
 
 for node in input_data.keys():
-    for visit in input_data[key]:
-        searchstring = str(visit[0])
+    for instcat, sensors, num_objs in input_data[key]:
+        searchstring = str(visit)
         files = glob.glob(outfilepath+'*/'+searchstring+'/*')
-        for instcat, sensor, numobj in visit:
+        for i in range(len(sensors)):
             # something here to compare sensor name to files in the list
             # remove the sensor from the list if a .fits.gz exists and not
             # a .json
-
-            # update the number of objects for the sensor
-            # to simulate
+            
+            # currently assuming giant dictionary, to do this. Might be
+            # more clever solution with regex or the like to explore.
+            matching = [s for s in files if sensordict[sensor[i]] in s]
+            check_gz = [s for s in matching if '.gz' in s]
+            check_ckpt = [s for s in matching if '.ckpt' in s]
+            
+            if check_gz and not check_ckpt:
+                sensors[i] = []
+                numobjs[i] = []
+            else:
+                # update the number of objects left in the sensor.
 
 with open(restartpath+infile+'restart.json', 'w') as outfile:
     json.dump(input_data, outfile)
