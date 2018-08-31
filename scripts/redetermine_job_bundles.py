@@ -4,7 +4,7 @@ import sys
 
 # Three system arguments input by default:
 infile = sys.argv[1]   # /path/to/json/inputfile of all jobs you haven't started
-waitpath = sys.argv[2] # /path/to/dir storing all your checkpointed job output
+restartpath = sys.argv[2] # /path/to/dir storing all your checkpointed job output
 outfile = sys.argv[3]  # /path/to/json/outfile for all jobs to now start.
 
 
@@ -26,6 +26,7 @@ max_fit = 10 # again, currently harded coded; keeps from running out of memory
 # Read in JSON file containing tuples of (instcat, [list of sensors]) for each job.
 with open(infile) as json_input:
     run_data = json.load(json_input)
+
 #Preprocessing step to recombine any two with the same instance catalogs.
 temp_sensors = dict()
 temp_numobjs = dict()
@@ -38,6 +39,12 @@ for visit, sensors, numobj in run_data:
     else:
         temp_sensors[key] = sensors
         temp_numobjs[key] = numobj
+
+# TODO: Code that walks over the directory provided in restart path,
+# reading in all .json files, and adds them to temp_sensors and temp_numobjs
+# with their own keys based on the visit ID. It should basically be the above code,
+# but as a loop over all found files in that directory.
+
 
 sample = []
 for key in temp_sensors.keys():
