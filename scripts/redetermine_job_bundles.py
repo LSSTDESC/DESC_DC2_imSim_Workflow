@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import sys
+import glob
 
 # Three system arguments input by default:
 infile = sys.argv[1]   # /path/to/json/inputfile of all jobs you haven't started
@@ -40,11 +41,21 @@ for visit, sensors, numobj in run_data:
         temp_sensors[key] = sensors
         temp_numobjs[key] = numobj
 
-# TODO: Code that walks over the directory provided in restart path,
-# reading in all .json files, and adds them to temp_sensors and temp_numobjs
-# with their own keys based on the visit ID. It should basically be the above code,
-# but as a loop over all found files in that directory.
 
+listofrestarts = glob.glob(restartpath+'*.json')
+
+for restart in list of restarts:
+    with open(restart) as json_input:
+         restart_data = json.load(json_input)
+    for visit, sensors, numobj in restart_data:
+        key = str(visit)
+        if key in temp_sensors:
+            for sensor in sensors:
+                temp_sensors[key].append(sensor)
+                temp_numobjs[key].append(numobj)
+        else:
+            temp_sensors[key] = sensors
+            temp_numobjs[key] = numobj
 
 sample = []
 for key in temp_sensors.keys():
