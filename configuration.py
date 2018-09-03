@@ -27,7 +27,7 @@ RESULT_URL = "tcp://{}:50006".format(SUBMIT_HOST_IP)
 
 launch_cmd='which python3; \
 aprun -b -cc depth -j 1 -d 64 -n $(($COBALT_PARTSIZE * {tasks_per_node})) -N {tasks_per_node} \
-python3 /home/benc/desc2.0i/parsl/parsl/executors/mpix/fabric.py -d --task_url={task_url} --result_url={result_url}'
+python3 /home/benc/desc2.0i/parsl/parsl/executors/mpix/fabric_singlethreaded.py -d --task_url={task_url} --result_url={result_url}'
 
 overrides="""module load intelpython35/2017.0.035                                                                                                                                                                              
 source activate theta_intel_test1 
