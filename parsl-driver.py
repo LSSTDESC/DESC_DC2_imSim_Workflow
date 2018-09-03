@@ -55,7 +55,7 @@ singularity_future.result()
 
 print("launching runs")
 
-res = []
+futures = []
 
 
 
@@ -73,9 +73,12 @@ for instance_catalog in instance_catalogs:
   futures.append(future)
 
 
-for f in res:
+for f in futures:
   print("waiting for a future")
-  f.result()
+  try:
+    f.result()
+  except e:
+    print("future result gave exception {} which this script will ignore".format(e))
 
-print("result received. the end")
+print("all futures have given a result or failed. the end")
 
