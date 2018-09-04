@@ -25,27 +25,38 @@ with open(infile) as fp:
 # Step 3: For each key in the input.json, search the list for .fits.gz
 # and .ckpt files.
 
+# As part of this, we need to define a search directory. We can probably
+# just grab this off the .json file with (or similar):
+# searchpath = str('/'.join(instcat.split('/')[-4:-2]))
+
 for node in input_data.keys():
-    for instcat, sensors, num_objs in input_data[key]:
-        searchstring = str(visit)
-        files = glob.glob(outfilepath+'*/'+searchstring+'/*')
+    for instcat, sensors, num_objs in input_data[node]:
+        searchstring = str('/'.join(instcat.split('/')[-4:-2]))
+        files = glob.glob(outfilepath+'/'+searchstring+'/*')
         for i in range(len(sensors)):
             # something here to compare sensor name to files in the list
             # remove the sensor from the list if a .fits.gz exists and not
             # a .json
-            
-            # currently assuming giant dictionary, to do this. Might be
-            # more clever solution with regex or the like to explore.
-            matching = [s for s in files if sensordict[sensor[i]] in s]
-            check_gz = [s for s in matching if '.gz' in s]
-            check_ckpt = [s for s in matching if '.ckpt' in s]
+
+            # not the most elegant way to handle this, but a way to handle
+            # this.
+            sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
+            gz_sensorstr = 'R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
+            ckpt_sensorstr = 'R_'+sensor_nums[0]+'_'+sensor_nums[1]+'_S_'+sensor_nums[2]+'_'+sensor_nums[3]            
+            matchinggz = [s for s in files if gz_sensorstr in s]
+            check_gz = [s for s in matchinggz if '.gz' in s]
+            matchingckpt = [s for s in files if ckpt_sensorstr in s]
+            check_ckpt = [s for s in matchingckpt if '.ckpt' in s]
             
             if check_gz and not check_ckpt:
                 sensors[i] = []
-                numobjs[i] = []
+                num_objs[i] = []
             else:
                 # update the number of objects left in the sensor.
+                pass
 
-with open(restartpath+infile+'restart.json', 'w') as outfile:
+# strip last part of infile name
+outfilename = (infile.split('/')[-1]).split('.')[0]
+
+with open(restartpath+outfilename+'_restart.json', 'w') as outfile:
     json.dump(input_data, outfile)
-

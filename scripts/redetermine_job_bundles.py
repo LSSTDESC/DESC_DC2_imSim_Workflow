@@ -31,23 +31,9 @@ with open(infile) as json_input:
 #Preprocessing step to recombine any two with the same instance catalogs.
 temp_sensors = dict()
 temp_numobjs = dict()
-for visit, sensors, numobj in run_data:
-    key = str(visit)
-    if key in temp_sensors:
-        for sensor in sensors:
-            temp_sensors[key].append(sensor)
-            temp_numobjs[key].append(numobj)
-    else:
-        temp_sensors[key] = sensors
-        temp_numobjs[key] = numobj
 
-
-listofrestarts = glob.glob(restartpath+'*.json')
-
-for restart in list of restarts:
-    with open(restart) as json_input:
-         restart_data = json.load(json_input)
-    for visit, sensors, numobj in restart_data:
+for node in run_data.keys():
+    for visit, sensors, numobj in run_data[node]:
         key = str(visit)
         if key in temp_sensors:
             for sensor in sensors:
@@ -56,6 +42,27 @@ for restart in list of restarts:
         else:
             temp_sensors[key] = sensors
             temp_numobjs[key] = numobj
+
+
+listofrestarts = glob.glob(restartpath+'*.json')
+for restart in listofrestarts:
+    with open(restart) as json_input:
+         restart_data = json.load(json_input)
+    for node in restart_data.keys():
+        for visit, sensors, numobj in restart_data[node]:
+            key = str(visit)
+            if key in temp_sensors:
+                for sensor in sensors:
+                    if sensor:
+                        temp_sensors[key].append(sensor)
+                        temp_numobjs[key].append(numobj)
+            else:
+                temp_sensors[key] = []
+                temp_numobjs[key] = []
+                for sensor in sensors:
+                    if sensor:
+                        temp_sensors[key].append(sensor)
+                        temp_numobjs[key].append(numobj)
 
 sample = []
 for key in temp_sensors.keys():
