@@ -44,7 +44,7 @@ max_instances_node = 10
 bundle_list_a = jbu.determine_bundles(worklist_a, max_threads_node, max_instances_node)
 
 # This bundle list can be saved and used for your workflow of choice!
-with open('/mnt/scripts/bundle_worklist_a.json') as fp:
+with open('/mnt/scripts/bundle_worklist_a.json', 'w') as fp:
     json.dump(bundle_list_a, fp)
 
 # We want to be able to check if a job has outputs. Since we haven't started the job,
@@ -67,7 +67,7 @@ with open('/mnt/scripts/instcat_worklist_b.json') as fp:
     worklist_b = json.load(fp)
 bundle_list_b = jbu.determine_bundles(worklist_b, max_threads_node, max_instances_node)
 with open('/mnt/scripts/bundle_worklist_b.json', 'w') as fp:
-    json.dump(fp)
+    json.dump(bundle_list_b, fp)
 
 # And now let's combine THIS with our restart data to generate a new master bundling.
 worklist_new = jbu.determine_remaining_jobs('/mnt/scripts/bundle_worklist_b.json', restartpath)
