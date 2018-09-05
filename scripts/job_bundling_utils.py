@@ -32,7 +32,7 @@ def determine_bundles(sample, max_threads_node=64, max_instances_node=10):
                 temp_sensor.append((sample[i])[1].pop())
                 temp_num.append((sample[i])[2].pop())
             nodedict = 'node'+str(bin_counter)
-            bundle_list[nodedict]=[((sample[i])[0],temp_sensor,tempnum)]
+            bundle_list[nodedict]=[((sample[i])[0],temp_sensor,temp_num)]
             bin_counter += 1
 
     # adjust so we don't look into already "full" bins.

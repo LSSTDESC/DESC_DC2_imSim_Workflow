@@ -12,8 +12,8 @@ subset_index = sys.argv[1]
 with open('/mnt/scripts/outputs/instcat_list_subset'+str(subset_index)+'.json', 'r') as f:
     instcat_list_subset = json.load(f)
 
-# Import determine job bundles...
+# Import instcat trimmer
 sys.path.append('/mnt/scripts')
-import determine_job_bundles as djb
+import instcat_trimmer as ict
 
-nodelist = djb.determine_bundling(instcat_list_subset, '/mnt/scripts/outputs/bundle_list_subset'+str(subset_index)+'.json')
+ict.determine_instcat_work(instcat_list_subset, '/mnt/scripts/outputs/worklist_subset'+str(subset_index)+'.json')
