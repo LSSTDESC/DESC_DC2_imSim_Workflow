@@ -20,7 +20,7 @@ import job_bundling_utils as jbu
 # first, we set a group of instcat files to be ingested. Let's choose two for speed.
 # Note that the paths here are important; these need to match your later ingest into imSim for
 # singularity input binds.
-instcat_list_a = ['/mnt/cwd/DC2-R1-2p-WFD-g/000000/instCat/phosim_cat_159479.txt,
+instcat_list_a = ['/mnt/cwd/DC2-R1-2p-WFD-g/000000/instCat/phosim_cat_159479.txt', 
                  '/mnt/cwd/DC2-R1-2p-WFD-g/000001/instCat/phosim_cat_159480.txt']
 
 # We then want to find out what work needs to be done on this sensor. To do that,
@@ -60,13 +60,17 @@ restartpath = '/mnt/restarts/'                  # where we are putting all our r
 jbu.check_job_success(infile, outpath, restartpath)
 
 # Let's make a new set of work to also do real quick.
-instcat_list_b = ['/mnt/cwd/DC2-R1-2p-WFD-g/000003/instCat/phosim_cat_159492.txt,
+instcat_list_b = ['/mnt/cwd/DC2-R1-2p-WFD-g/000003/instCat/phosim_cat_159492.txt',
                  '/mnt/cwd/DC2-R1-2p-WFD-g/000004/instCat/phosim_cat_159493.txt']
 ict.determine_instcat_work(instcat_list_b, '/mnt/scripts/instcat_worklist_b.json')
-
+with open('/mnt/scripts/instcat_worklist_b.json') as fp:
+    worklist_b = json.load(fp)
+bundle_list_b = jbu.determine_bundles(worklist_b, max_threads_node, max_instances_node)
+with open('/mnt/scripts/bundle_worklist_b.json', 'w') as fp:
+    json.dump(fp)
 
 # And now let's combine THIS with our restart data to generate a new master bundling.
-worklist_new = jbu.determine_remaining_jobs('/mnt/scripts/instcat_worklist_b.json', restartpath)
+worklist_new = jbu.determine_remaining_jobs('/mnt/scripts/bundle_worklist_b.json', restartpath)
 bundle_list_new = jbu.determine_bundles(worklist_new, max_threads_node, max_instances_node)
 
 # And we can just save this new work list!
