@@ -43,7 +43,6 @@ def determine_bundles(sample, max_threads_node=64, max_instances_node=10):
 
     # sort arrays by largest number of remaining threads to smallest.
     sort_idx = np.array(thread_counts).argsort()[::-1]
-    print('sort_idx:', sort_idx)
     for idx in sort_idx:
         found_fit = 0
         if (open_bins and thread_counts[idx]>0):
@@ -150,8 +149,9 @@ def check_job_success(infile, outpath, restartpath):
 
     for node in input_data.keys():
         for visit, sensors, numobjs in input_data[node]:
+            # This line in particular may need changing depending on how we set up our output directory
+            # structure.
             searchstring = str('/'.join(visit.split('/')[-4:-2]))
-            print(searchstring)
             files = glob.glob(outpath+searchstring+'*')
             for i in range(len(sensors)):
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
