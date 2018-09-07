@@ -151,7 +151,7 @@ def check_job_success(infile, outpath, restartpath):
         for visit, sensors, numobjs in input_data[node]:
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
-            searchstring = str('/'.join(visit.split('/')[-4:-2]))
+            searchstring = str('/'.join(visit.split('/')[-4:-2])+'/')
             files = glob.glob(outpath+searchstring+'*')
             for i in range(len(sensors)):
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
