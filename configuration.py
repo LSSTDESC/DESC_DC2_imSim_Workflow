@@ -5,13 +5,20 @@ from parsl.config import Config
 from parsl.executors.mpix import MPIExecutor
 from parsl.executors.threads import ThreadPoolExecutor
 
-THETA_NODES=8
+THETA_NODES=128
  # this should scale up to 802 in real life, or up to 8 or 16 in debug queue
  # note at present, 1 is required to run the rank 0 controller, not any app tasks
  # so the minimum value to make progress is 2
 
-THETA_QUEUE="debug-flat-quad"
-WALLTIME="00:58:00"
+THETA_QUEUE="default"
+WALLTIME="02:58:30"
+
+
+#THETA_NODES=8
+#THETA_QUEUE="debug-flat-quad"
+#WALLTIME="00:58:00"
+
+
 ACCOUNT="LSSTADSP_DESC"
 
 # ip (or hostname, probably) of the submitting host
