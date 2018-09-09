@@ -73,7 +73,7 @@ logger.info("caching singularity image")
 
 
 if (not configuration.fake) and configuration.singularity_download:
-  singularity_future = cache_singularity_image(configuration.singularity_img, "shub://benclifford/ALCF_1.2i")
+  singularity_future = cache_singularity_image(configuration.singularity_img, configuration.singularity_url)
 
   singularity_future.result()
 

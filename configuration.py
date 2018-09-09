@@ -31,13 +31,13 @@ work_and_out_path = "/projects/LSSTADSP_DESC/benc/"
 # singularity image containing the ALCF_1.2i distro
 singularity_img = work_and_out_path + "ALCF_1.2.simg"
 
-singularity_url = "shub://benclifford/ALCF_1.2"
+singularity_url = "shub://benclifford/ALCF_1.2i"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
 # probably should be set to True unless testing
 # interactively
-singularity_download = False
+singularity_download = True
 
 # set to true to use fake short sleep instead of singularity
 fake = False
