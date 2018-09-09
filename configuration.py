@@ -24,6 +24,44 @@ WALLTIME="00:58:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
+
+# /-terminated path to work and output base dir
+work_and_out_path = "/projects/LSSTADSP_DESC/benc/"
+
+# singularity image containing the ALCF_1.2i distro
+singularity_img = work_and_out_path + "ALCF_1.2.simg"
+
+singularity_url = "shub://benclifford/ALCF_1.2"
+
+# whether to download the singularity image or to
+# use the local copy from (eg) a previous run
+# probably should be set to True unless testing
+# interactively
+singularity_download = False
+
+# set to true to use fake short sleep instead of singularity
+fake = False
+
+
+inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
+
+
+# trickle-loop parameters
+# submit 10% more jobs than we have nodes for so that there are
+# at least some waiting to run
+max_simultaneous_submit = THETA_NODES * 1.1
+
+rebalance_seconds = 3 * 60
+#rebalance_seconds = 4 * 60 * 60
+
+trickle_loop_seconds = 60
+
+
+
+
+
+
+
 # ip (or hostname, probably) of the submitting host
 SUBMIT_HOST_IP = "10.236.1.193"
 

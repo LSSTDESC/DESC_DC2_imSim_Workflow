@@ -23,38 +23,6 @@ import configuration
 
 parsl.load(configuration.parsl_config)
 
-
-# /-terminated path to work and output base dir
-cfg_work_and_out_path = "/projects/LSSTADSP_DESC/benc/"
-
-# singularity image containing the ALCF_1.2i distro
-cfg_singularity_img = cfg_work_and_out_path + "ALCF_1.2.simg"
-
-cfg_singularity_url = "shub://benclifford/ALCF_1.2"
-
-# whether to download the singularity image or to
-# use the local copy from (eg) a previous run
-# probably should be set to True unless testing
-# interactively
-cfg_singularity_download = False
-
-# set to true to use fake short sleep instead of singularity
-cfg_fake = False
-
-
-cfg_inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
-
-
-# trickle-loop parameters
-# submit 10% more jobs than we have nodes for so that there are
-# at least some waiting to run
-cfg_max_simultaneous_submit = configuration.THETA_NODES * 1.1
-
-cfg_rebalance_seconds = 3 * 60
-#cfg_rebalance_seconds = 4 * 60 * 60
-
-cfg_trickle_loop_seconds = 60
-
 @bash_app(executors=['submit-node'])
 def cache_singularity_image(local_file, url):
     return "singularity build {} {}".format(local_file, url)
@@ -79,9 +47,9 @@ def trickle_submit(task_info):
   logger.info("launching a run for instance catalog {}".format(instance_catalog))
 
   # TODO: factor this base 
-  stuff_a = instance_catalog.replace(cfg_inst_cat_root, "ICROOT", 1)
+  stuff_a = instance_catalog.replace(configuration.inst_cat_root, "ICROOT", 1)
   stuff_b = stuff_a.replace("/", "_")
-  pathbase = "{}/run/{}/".format(cfg_work_and_out_path, stuff_b)
+  pathbase = "{}/run/{}/".format(configuration.work_and_out_path, stuff_b)
   outdir = pathbase + "out/"
   workdir = pathbase + "work/"
 
@@ -91,25 +59,25 @@ def trickle_submit(task_info):
   ot = workdir + "task-stdout.txt"
   er = workdir + "task-stderr.txt"
  
-  future = run_imsim(63, cfg_work_and_out_path, cfg_singularity_img, instance_catalog, cfg_inst_cat_root, stdout=ot, stderr=er)
+  future = run_imsim(63, configuration.work_and_out_path, configuration.singularity_img, instance_catalog, configuration.inst_cat_root, stdout=ot, stderr=er)
   logger.info("launched a run for instance catalog {}".format(instance_catalog))
   return future
 
 
 logger.info("listing instance catalogs")
 # This glob came from Jim Chiang
-instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(cfg_inst_cat_root))
+instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(configuration.inst_cat_root))
 logger.info("there are {} instance catalogs to process".format(len(instance_catalogs)))
 
 logger.info("caching singularity image")
 
 
-if (not cfg_fake) and cfg_singularity_download:
-  singularity_future = cache_singularity_image(cfg_singularity_img, "shub://benclifford/ALCF_1.2i")
+if (not configuration.fake) and configuration.singularity_download:
+  singularity_future = cache_singularity_image(configuration.singularity_img, "shub://benclifford/ALCF_1.2i")
 
   singularity_future.result()
 
-if cfg_fake:
+if configuration.fake:
     run_imsim = run_imsim_in_singularity_fake
 else:
     run_imsim = run_imsim_in_singularity
@@ -125,9 +93,9 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
   balance_ago = time.time() - last_rebalance
   logger.info("trickle loop: looping - {} tasks still to submit, {} futures to wait for, last rebalance was {} ago".format(len(todo_tasks), len(submitted_futures), round(balance_ago) ))
 
-  if balance_ago > cfg_rebalance_seconds:
+  if balance_ago > configuration.rebalance_seconds:
     logger.info("CALLBACK: rebalance")
-    last_rebalance = time.time() # this will be roughly the time the rebalance finished, not cfg_rebalance_seconds after the last rebalance
+    last_rebalance = time.time() # this will be roughly the time the rebalance finished, not configuration.rebalance_seconds after the last rebalance
 
   # check if any futures are finished, without blocking
   for f in submitted_futures:
@@ -136,14 +104,14 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
       logger.info("CALLBACK: task done")
       submitted_futures.remove(f)
 
-  while len(submitted_futures) < cfg_max_simultaneous_submit and len(todo_tasks) > 0:
+  while len(submitted_futures) < configuration.max_simultaneous_submit and len(todo_tasks) > 0:
     logger.info("There is capacity for a new task")
     task_info = todo_tasks.pop()
     f = trickle_submit(task_info)
     submitted_futures.append(f)
 
   logger.info("trickle loop: end iteration")
-  time.sleep(cfg_trickle_loop_seconds)
+  time.sleep(configuration.trickle_loop_seconds)
 
 
 
