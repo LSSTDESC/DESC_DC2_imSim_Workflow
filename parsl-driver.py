@@ -26,8 +26,15 @@ cfg_singularity_img = cfg_work_and_out_path + "ALCF_1.2.simg"
 
 cfg_singularity_url = "shub://benclifford/ALCF_1.2"
 
+# whether to download the singularity image or to
+# use the local copy from (eg) a previous run
+# probably should be set to True unless testing
+# interactively
+cfg_singularity_download = False
+
 # set to true to use fake short sleep instead of singularity
 cfg_fake = False
+
 
 cfg_inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
 
@@ -47,7 +54,7 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
     pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
     outdir = pathbase + "out/"
     workdir = pathbase + "work/"
-    return "singularity run -B {},{} {} --instcat {} --workdir {} --outdir {} --low_fidelity --subset_size 300 --subset_index 0 --file_id ckpt --processes {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat, outdir, workdir, nthreads)
+    return "echo BENC: info pre singularity; date ; echo BENC id; id ; echo BENC HOME = $HOME; echo BENC hostnaee ; hostname ; echo BENC ls ~ ; ls ~ ; echo BENC launch singularity ; singularity run -B {},{} {} --instcat {} --workdir {} --outdir {} --low_fidelity --subset_size 300 --subset_index 0 --file_id ckpt --processes {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat, outdir, workdir, nthreads)
 
 
 print("listing instance catalogs")
@@ -58,7 +65,7 @@ print("there are {} instance catalogs to process".format(len(instance_catalogs))
 print("caching singularity image")
 
 
-if not cfg_fake:
+if (not cfg_fake) and cfg_singularity_download:
   singularity_future = cache_singularity_image(cfg_singularity_img, "shub://benclifford/ALCF_1.2i")
 
   singularity_future.result()
