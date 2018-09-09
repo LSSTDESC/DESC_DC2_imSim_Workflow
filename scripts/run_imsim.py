@@ -36,7 +36,7 @@ def run_imsim(instcat, workdir, outdir, processes, low_fidelity,
 
     if bundle_lists is None:
         if instcat is None:
-            raise RuntimeError("Either an instcat or bundle_lists file"
+            raise RuntimeError("Either an instcat or bundle_lists file "
                                "must be provided.")
         sensor_list = sensor_subset(subset_size, subset_index)
     else:
