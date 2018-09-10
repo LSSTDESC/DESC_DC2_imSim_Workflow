@@ -98,10 +98,10 @@ if __name__=='__main__':
     parser.add_argument('--low_fidelity', default=False, action='store_true',
                         help='Run in low fidelity mode.')
     parser.add_argument('--subset_size', type=int, default=1,
-                        help='subset size of full focalplane sensors'
+                        help='subset size of full focalplane sensors '
                         'to simulate. Default: 1')
     parser.add_argument('--subset_index', type=int, default=94,
-                        help='starting index of subset full focalplane'
+                        help='starting index of subset full focalplane '
                         'sensors to simulate. Default: 94')
     parser.add_argument('--file_id', type=str, default=None,
                         help='file_id to use for checkpoint files. '
@@ -111,10 +111,10 @@ if __name__=='__main__':
                         'If not None, this overrides the instcat argument'
                         'and the --subset_* parameters')
     parser.add_argument('--node_id', type=str, default='node0',
-                        help='Node ID of desired visit/sensors lists.'
+                        help='Node ID of desired visit/sensors lists. '
                         'Default: node0')
     parser.add_argument('--visit_index', type=int, default=0,
-                        help='Index of the visit/sensor list tuple in the'
+                        help='Index of the visit/sensor list tuple in the '
                         'desired node bundle. Default: 0')
     parser.add_argument('--log_level', type=str, default='INFO',
                         choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'],

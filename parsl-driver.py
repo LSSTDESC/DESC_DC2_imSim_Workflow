@@ -2,6 +2,7 @@
 import glob
 import time
 import pathlib
+import json
 
 import parsl
 from parsl.app.app import bash_app
@@ -33,41 +34,52 @@ def run_imsim_in_singularity_fake(nthreads: int, work_and_out_base: str, singula
     return "echo start a bash task; sleep 20s ; echo this is stdout ; (echo this is stderr >&2 ) ; false"
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str, inst_cat_root: str, stdout=None, stderr=None):
-    stuff_a = inst_cat.replace(inst_cat_root, "ICROOT", 1)
-    stuff_b = stuff_a.replace("/", "_")
+def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
+    run = bundle[0]
+    inst_cat_path = run[0]
+    sensor_count = len(run[1]) # TODO: use instead of nthreads
+    stuff_b = inst_cat_path.replace(inst_cat_root, "ICROOT", 1).replace("/", "_")
     pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
     outdir = pathbase + "out/"
     workdir = pathbase + "work/"
-    return "echo BENC: info pre singularity; date ; echo BENC id; id ; echo BENC HOME = $HOME; echo BENC hostnaee ; hostname ; echo BENC ls ~ ; ls ~ ; echo BENC launch singularity ; singularity run -B {},{} {} --instcat {} --workdir {} --outdir {} --low_fidelity --subset_size 300 --subset_index 0 --file_id ckpt --processes {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat, outdir, workdir, nthreads)
+    visit_index = 0
+    return "echo BENC: info pre singularity; date ;  echo BENC sensor count is {} ; echo BENC id; id ; echo BENC HOME = $HOME; echo BENC hostnaee ; hostname ; echo BENC ls ~ ; ls ~ ; echo BENC launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id ckpt --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, nthreads, bundle_lists, nodeid, visit_index)
 
-def trickle_submit(task_info):
+def trickle_submit(bundle_lists, task_info):
 
-  instance_catalog = task_info
-  logger.info("launching a run for instance catalog {}".format(instance_catalog))
+  logger.info("trickle_submit has bundle {}".format(task_info))
 
-  # TODO: factor this base 
-  stuff_a = instance_catalog.replace(configuration.inst_cat_root, "ICROOT", 1)
-  stuff_b = stuff_a.replace("/", "_")
-  pathbase = "{}/run/{}/".format(configuration.work_and_out_path, stuff_b)
-  outdir = pathbase + "out/"
-  workdir = pathbase + "work/"
+  (nodename, catalogs) = task_info
+
+  logger.info("trickle_submit: submitting for bundle nodename {}".format(nodename))
+  logger.info("trickle_submit: submitting (parts of) {} instance catalogs".format(len(catalogs)))
+
+  workdir = "{}/node_logs/{}/".format(configuration.work_and_out_path, nodename)
 
   pathlib.Path(workdir).mkdir(parents=True, exist_ok=True) 
 
-  logger.info("app stdout/stderr logging: will create path {}".format(workdir))
+  logger.info("app stdout/stderr logging: will create path {} for task stdout/err".format(workdir))
   ot = workdir + "task-stdout.txt"
   er = workdir + "task-stderr.txt"
- 
-  future = run_imsim(63, configuration.work_and_out_path, configuration.singularity_img, instance_catalog, configuration.inst_cat_root, stdout=ot, stderr=er)
-  logger.info("launched a run for instance catalog {}".format(instance_catalog))
+
+  future = run_imsim(64, configuration.work_and_out_path, configuration.singularity_img, configuration.inst_cat_root, bundle_lists, nodename, catalogs, stdout=ot, stderr=er)
+  logger.info("launched a run for bundle nodename {}".format(nodename))
+
   return future
 
 
-logger.info("listing instance catalogs")
+#logger.info("listing instance catalogs")
 # This glob came from Jim Chiang
-instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(configuration.inst_cat_root))
-logger.info("there are {} instance catalogs to process".format(len(instance_catalogs)))
+#instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(configuration.inst_cat_root))
+#logger.info("there are {} instance catalogs to process".format(len(instance_catalogs)))
+
+
+logger.info("loading bundles")
+
+bundle_lists = "/projects/LSSTADSP_DESC/benc/manual/bundle_worklist_a.json"
+with open(bundle_lists) as fp:
+  bundles = json.load(fp)
+logger.info("Loaded {} bundles".format(len(bundles)))
 
 logger.info("caching singularity image")
 
@@ -85,7 +97,7 @@ else:
 logger.info("Starting up trickle-in loop")
 
 
-todo_tasks = instance_catalogs
+todo_tasks = bundles
 submitted_futures = []
 last_rebalance = time.time()
 
@@ -106,8 +118,9 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
 
   while len(submitted_futures) < configuration.max_simultaneous_submit and len(todo_tasks) > 0:
     logger.info("There is capacity for a new task")
-    task_info = todo_tasks.pop()
-    f = trickle_submit(task_info)
+    task_info = todo_tasks.popitem()
+    logger.info("popped task_info is: {}".format(task_info))
+    f = trickle_submit(bundle_lists, task_info)
     submitted_futures.append(f)
 
   logger.info("trickle loop: end iteration")
