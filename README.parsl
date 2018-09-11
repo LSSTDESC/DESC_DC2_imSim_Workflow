@@ -1,0 +1,73 @@
+
+desc2.0i using a parsl driver
+=============================
+
+0. Do all of the below on a theta login node.
+
+1. Ensure an ALCF_1.2i singularity image exists on
+   Singularity Hub.
+
+Making that happen is outside the scope of this document.
+The `shub` URL to that image will be needed for the
+configuration of the parsl workflow driver.
+
+2. Install parsl.
+
+The parsl workflow driver is not intended to be used with
+the master or released version of parsl.
+
+A number of fixes and features have been implemented during
+the ALCF2.0i work, and those can be found (at time of writing)
+on the `mpi_executor` branch of the parsl git repository.
+(If you are reading this a long time after September 2018,
+hopefully those fixes and features will have been merged into
+mainline parsl)
+
+parsl should be installed in a conda environment along with
+some other stuff.
+
+Roughly:
+
+$ module load intelpython35/2017.0.035
+
+will give the right conda
+
+if the conda env already exists (which it won't the first time)
+
+source activate my_env
+
+otherwise, create it and build it:
+
+eg 
+
+conda create --name my_env python=3.6
+source activate my_env
+# originally some fooling with MPI versions but finally just left it
+pip install mpi4py
+(test it with mpiexec -np 4 python -m mpi4py.bench helloworld)
+git clone parsl
+git checkout mpi-executor
+pip install .
+
+
+
+3. Configure the parsl workflow driver.
+
+These settings are set in configuration.py
+
+They should be documented in place, rather than in this file, so
+go look at configuration.py to see the list.
+
+4. Run the workflow driver:
+
+python parsl-driver.py
+
+The workflow driver will submit a batch job to theta's cobal
+queueing system, and when that batch job starts running, it
+will run singularity containers on the nodes allocated to that
+batch job.
+
+When the batch job terminates, parsl will not allocate a new
+batch job, and so the driver will hang forever making no
+further progress. (An alternative configuration is that the
+driver can submit a new batch job at this point)
