@@ -154,8 +154,9 @@ def check_job_success(infile, outpath, restartpath):
             # structure.
             print("Checking for completed work: node {}, visit {}".format(node, visit))
             searchstring = str('/'.join(visit.split('/')[-4:-2])+'/')
-            files = glob.glob(outpath+searchstring+'*')
-            print("Checking for completed work: node {}, visit {}: glob found {} names".format(node, visit,len(files)))
+            pat = outpath+searchstring+'*'
+            files = glob.glob(pat)
+            print("Checking for completed work: node {}, visit {}: glob {} found {} names".format(node, visit, pat, len(files)))
             for i in range(len(sensors)):
                 print("Checking for completed work: node {}, visit {}, sensor index = {}".format(node, visit, i))
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]

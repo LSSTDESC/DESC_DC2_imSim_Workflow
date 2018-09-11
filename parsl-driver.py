@@ -30,7 +30,7 @@ def generate_worklist(singularity_img_path: str, inst_cat_root: str, work_and_ou
 
 @bash_app(executors=['submit-node'])
 def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base, bundler_restart_path)
+    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 
 @bash_app(executors=['submit-node'])
