@@ -13,6 +13,9 @@ from parsl.executors.threads import ThreadPoolExecutor
 #THETA_QUEUE="default"
 #WALLTIME="02:58:30"
 
+#THETA_NODES=2048
+#THETA_QUEUE="R.LSSTADSP_DESC"
+#WALLTIME="23:58:00"
 
 THETA_NODES=8
 THETA_QUEUE="debug-flat-quad"
