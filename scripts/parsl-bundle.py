@@ -14,6 +14,10 @@ inst_cat_root = sys.argv[1]
 worklist = sys.argv[2]
 bundles = sys.argv[3]
 
+outpath = sys.argv[4]
+
+restartpath = sys.argv[5]
+
 # With all the work to be done found, we then want to determine some initial bundling scheme.
 # To do this, we call on the job_bundling_utils module. Let's read in that json file.
 with open(worklist) as fp:
@@ -26,12 +30,29 @@ with open(worklist) as fp:
 
 max_threads_node = 64
 max_instances_node = 10
+
+print("parsl-initial-bundle: Bundling first pass...")
 bundle_list_a = jbu.determine_bundles(worklist_a, max_threads_node, max_instances_node)
 
 # This bundle list can be saved and used for your workflow of choice!
 with open(bundles, 'w') as fp:
     json.dump(bundle_list_a, fp)
 
+print("parsl-initial-bundle: Checking job success...")
+
+jbu.check_job_success(bundles, outpath, restartpath)
+
+print("parsl-initial-bundle: Determining remaining jobs...")
+worklist_new = jbu.determine_remaining_jobs("/home/benc/desc2.0i/ALCF_1.2i/empty-worklist.json", restartpath)
+
+print("parsl-initial-bundle: Bundling second pass...")
+
+bundle_list_new = jbu.determine_bundles(worklist_new, max_threads_node, max_instances_node)
+
+with open(bundles, 'w') as fp:
+    json.dump(bundle_list_new, fp)
+
+print("parsl-initial-bundle: Done")
 
 sys.exit(0)
 

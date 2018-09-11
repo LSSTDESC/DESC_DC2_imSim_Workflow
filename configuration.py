@@ -37,7 +37,7 @@ singularity_url = "shub://benclifford/ALCF_1.2i"
 # use the local copy from (eg) a previous run
 # probably should be set to True unless testing
 # interactively
-singularity_download = True
+singularity_download = False
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
@@ -69,6 +69,8 @@ original_work_list = "/projects/LSSTADSP_DESC/benc/parsl-original-work.json"
 # this is where (posisbly auto-generated) bundle list will be stored
 bundle_lists = "/projects/LSSTADSP_DESC/benc/parsl-auto-bundles.json"
 
+# a temp working directory for the bundler
+bundler_restart_path = "/projects/LSSTADSP_DESC/benc/bundler-restart-tmp/"
 
 # ip (or hostname, probably) of the submitting host
 SUBMIT_HOST_IP = "10.236.1.193"

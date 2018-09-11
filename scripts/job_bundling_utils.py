@@ -152,9 +152,12 @@ def check_job_success(infile, outpath, restartpath):
         for visit, sensors, numobjs in input_data[node]:
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
+            print("Checking for completed work: node {}, visit {}".format(node, visit))
             searchstring = str('/'.join(visit.split('/')[-4:-2])+'/')
             files = glob.glob(outpath+searchstring+'*')
+            print("Checking for completed work: node {}, visit {}: glob found {} names".format(node, visit,len(files)))
             for i in range(len(sensors)):
+                print("Checking for completed work: node {}, visit {}, sensor index = {}".format(node, visit, i))
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
                 gz_sensorstr='R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
                 ckpt_sensorstr='R_'+sensor_nums[0]+'_'+sensor_nums[1]+'_S_'+sensor_nums[2]+'_'+sensor_nums[3]
@@ -164,6 +167,7 @@ def check_job_success(infile, outpath, restartpath):
                 check_ckpt = [s for s in matchingckpt if '.ckpt' in s]
 
                 if check_gz and not check_ckpt:
+                    print("Found completed work: node {}, visit {}, sensor index = {}".format(node, visit, i))
                     sensors[i] = []
                     numobjs[i] = []
                 else:

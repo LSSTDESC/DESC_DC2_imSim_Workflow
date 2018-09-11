@@ -29,8 +29,8 @@ def generate_worklist(singularity_img_path: str, inst_cat_root: str, work_and_ou
     return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
 @bash_app(executors=['submit-node'])
-def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
-    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
+def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
+    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base, bundler_restart_path)
 
 
 @bash_app(executors=['submit-node'])
@@ -57,8 +57,8 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
 
     stuff_b = inst_cat_path_trimmed.replace(inst_cat_root, "outputs/", 1)
     pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
-    outdir = pathbase + "out/"
-    workdir = pathbase + "work/"
+    outdir = pathbase + ""   # just in case we want to separate these
+    workdir = pathbase + ""
     visit_index = 0
 
     # filename in phosim_txt_fn will look like: phosim_cat_1909355.txt
@@ -109,7 +109,10 @@ if configuration.worklist_generate:
 
 logger.info("generating bundles")
 
-bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists)
+pathlib.Path(configuration.bundler_restart_path).mkdir(parents=True, exist_ok=True) 
+
+bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists, configuration.bundler_restart_path)
+
 bundle_future.result()
 
 logger.info("loading bundles")
