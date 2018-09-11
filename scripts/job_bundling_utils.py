@@ -105,24 +105,25 @@ def determine_remaining_jobs(infile, restartpath):
                 temp_numobjs[key] = numobjs
 
     listofrestarts = glob.glob(restartpath+'*.json')
-    for restart in listofrestarts:
-        with open(restart) as json_input:
-            restart_data = json.load(json_input)
-        for node in restart_data.keys():
-            for visit, sensors, numobjs in restart_data[node]:
-                key = str(visit)
-                if key in temp_sensors:
-                    for sensor, numobj in zip(sensors, numobjs):
-                        if numobj:
-                            temp_sensors[key].append(sensor)
-                            temp_numobjs[key].append(numobj)
-                else:
-                    temp_sensors[key] = []
-                    temp_numobjs[key] = [] 
-                    for sensor, numobj in zip(sensors, numobjs):
-                        if numobj:
-                            temp_sensors[key].append(sensor)
-                            temp_numobjs[key].append(numobj)
+    if listofrestarts:
+        for restart in listofrestarts:
+            with open(restart) as json_input:
+                restart_data = json.load(json_input)
+            for node in restart_data.keys():
+                for visit, sensors, numobjs in restart_data[node]:
+                    key = str(visit)
+                    if key in temp_sensors:
+                        for sensor, numobj in zip(sensors, numobjs):
+                            if numobj:
+                                temp_sensors[key].append(sensor)
+                                temp_numobjs[key].append(numobj)
+                    else:
+                        temp_sensors[key] = []
+                        temp_numobjs[key] = [] 
+                        for sensor, numobj in zip(sensors, numobjs):
+                            if numobj:
+                                temp_sensors[key].append(sensor)
+                                temp_numobjs[key].append(numobj)
     remaining_work = [[key, temp_sensors[key], temp_numobjs[key]] for key in temp_sensors.keys()]
     return remaining_work
 
