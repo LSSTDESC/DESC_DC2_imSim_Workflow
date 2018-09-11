@@ -30,7 +30,7 @@ bundles = sys.argv[3]
 # singularity input binds.
 
 print("parsl-initial-bundle: globbing")
-instcat_list_a = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(inst_cat_root))[0:3]
+instcat_list_a = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(inst_cat_root))[0:10]
 print("parsl-initial-bundle: globbed: {}".format(instcat_list_a))
 print("parsl-initial-bundle: globbed {} instance catalogs".format(len(instcat_list_a)))
 
