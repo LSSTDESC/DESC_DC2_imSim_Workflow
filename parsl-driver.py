@@ -25,6 +25,13 @@ import configuration
 parsl.load(configuration.parsl_config)
 
 @bash_app(executors=['submit-node'])
+def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
+    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-initial-bundle.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
+
+# bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.bundle_lists + ".work.json", configuration.bundle_lists)
+
+
+@bash_app(executors=['submit-node'])
 def cache_singularity_image(local_file, url):
     return "singularity build {} {}".format(local_file, url)
 
@@ -86,21 +93,26 @@ def trickle_submit(bundle_lists, task_info):
 #instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(configuration.inst_cat_root))
 #logger.info("there are {} instance catalogs to process".format(len(instance_catalogs)))
 
-
-logger.info("loading bundles")
-
-bundle_lists = "/projects/LSSTADSP_DESC/benc/manual/bundle_worklist_a.json"
-with open(bundle_lists) as fp:
-  bundles = json.load(fp)
-logger.info("Loaded {} bundles".format(len(bundles)))
-
 logger.info("caching singularity image")
-
 
 if (not configuration.fake) and configuration.singularity_download:
   singularity_future = cache_singularity_image(configuration.singularity_img, configuration.singularity_url)
 
   singularity_future.result()
+
+
+logger.info("generating bundles")
+
+bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.bundle_lists + ".work.json", configuration.bundle_lists)
+bundle_future.result()
+
+logger.info("loading bundles")
+
+with open(configuration.bundle_lists) as fp:
+  bundles = json.load(fp)
+logger.info("Loaded {} bundles".format(len(bundles)))
+
+
 
 if configuration.fake:
     run_imsim = run_imsim_in_singularity_fake
@@ -133,7 +145,7 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
     logger.info("There is capacity for a new task")
     task_info = todo_tasks.popitem()
     logger.info("popped task_info is: {}".format(task_info))
-    f = trickle_submit(bundle_lists, task_info)
+    f = trickle_submit(configuration.bundle_lists, task_info)
     submitted_futures.append(f)
 
   logger.info("trickle loop: end iteration")
