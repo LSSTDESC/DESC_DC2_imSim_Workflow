@@ -11,13 +11,17 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    cd /DC2
    git clone https://github.com/lsst/sims_GalSimInterface.git
    git clone https://github.com/LSSTDESC/imSim.git
+   git clone https://github.com/lsst/obs_lsstCam.git
    setup -r sims_GalSimInterface -j
    setup -r imSim -j
+   setup -r obs_lsstCam -j
    cd sims_GalSimInterface
    set +e
    scons
    set -e
    cd ../imSim
+   scons
+   cd ../obs_lsstCam
    scons
    cd ..
    git clone https://github.com/LSSTDESC/ALCF_1.2i.git
@@ -31,6 +35,7 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    cd /DC2
    setup -r sims_GalSimInterface -j
    setup -r imSim -j
+   setup -r obs_lsstCam -j
    cd
    export OMP_NUM_THREADS=1
 
