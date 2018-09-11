@@ -103,7 +103,7 @@ if (not configuration.fake) and configuration.singularity_download:
 
 logger.info("generating bundles")
 
-bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.bundle_lists + ".work.json", configuration.bundle_lists)
+bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists)
 bundle_future.result()
 
 logger.info("loading bundles")

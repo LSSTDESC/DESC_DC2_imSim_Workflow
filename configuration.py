@@ -44,6 +44,7 @@ fake = False
 
 
 inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
+# inst_cat_root = "/projects/LSSTADSP_DESC/benc/2.0i_sample/inputs/"
 
 
 # trickle-loop parameters
@@ -57,9 +58,12 @@ rebalance_seconds = 3 * 60
 trickle_loop_seconds = 60
 
 
+# the (expensive to generate) overall work list, which will include
+# everything we think needs to have been done, whether it has or not
+original_work_list = "/projects/LSSTADSP_DESC/benc/parsl-original-work.json"
 
-
-
+# this is where (posisbly auto-generated) bundle list will be stored
+bundle_lists = "/projects/LSSTADSP_DESC/benc/parsl-auto-bundles.json"
 
 
 # ip (or hostname, probably) of the submitting host
