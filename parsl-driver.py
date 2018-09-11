@@ -35,15 +35,28 @@ def run_imsim_in_singularity_fake(nthreads: int, work_and_out_base: str, singula
 
 @bash_app(executors=['worker-nodes'])
 def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
+
+    import os
+    import re
+
     run = bundle[0]
     inst_cat_path = run[0]
     sensor_count = len(run[1]) # TODO: use instead of nthreads
-    stuff_b = inst_cat_path.replace(inst_cat_root, "ICROOT", 1).replace("/", "_")
+
+    (inst_cat_dir1, phosim_txt_fn) = os.path.split(inst_cat_path)
+    (inst_cat_path_trimmed, instcat_const) = os.path.split(inst_cat_dir1)
+
+    stuff_b = inst_cat_path_trimmed.replace(inst_cat_root, "outputs/", 1)
     pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
     outdir = pathbase + "out/"
     workdir = pathbase + "work/"
     visit_index = 0
-    return "echo BENC: info pre singularity; date ;  echo BENC sensor count is {} ; echo BENC id; id ; echo BENC HOME = $HOME; echo BENC hostnaee ; hostname ; echo BENC ls ~ ; ls ~ ; echo BENC launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id ckpt --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, nthreads, bundle_lists, nodeid, visit_index)
+
+    # filename in phosim_txt_fn will look like: phosim_cat_1909355.txt
+    # extract the numeric part of that
+    (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
+
+    return "echo BENC: info pre singularity; date ;  echo BENC sensor count is {} ; echo BENC id; id ; echo BENC HOME = $HOME; echo BENC hostnaee ; hostname ; echo BENC ls ~ ; ls ~ ; echo BENC launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, nthreads, bundle_lists, nodeid, visit_index)
 
 def trickle_submit(bundle_lists, task_info):
 
