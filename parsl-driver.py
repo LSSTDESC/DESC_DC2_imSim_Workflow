@@ -25,10 +25,12 @@ import configuration
 parsl.load(configuration.parsl_config)
 
 @bash_app(executors=['submit-node'])
-def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
-    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-initial-bundle.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
+def generate_worklist(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
+    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
-# bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.bundle_lists + ".work.json", configuration.bundle_lists)
+@bash_app(executors=['submit-node'])
+def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
+    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
 
 @bash_app(executors=['submit-node'])
@@ -100,6 +102,9 @@ if (not configuration.fake) and configuration.singularity_download:
 
   singularity_future.result()
 
+logger.info("generating worklist")
+worklist_future = generate_worklist(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists)
+worklist_future.result()
 
 logger.info("generating bundles")
 
