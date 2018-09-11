@@ -30,7 +30,7 @@ def cache_singularity_image(local_file, url):
 
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity_fake(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat: str, inst_cat_root: str, stdout=None, stderr=None):
+def run_imsim_in_singularity_fake(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
     return "echo start a bash task; sleep 20s ; echo this is stdout ; (echo this is stderr >&2 ) ; false"
 
 @bash_app(executors=['worker-nodes'])
