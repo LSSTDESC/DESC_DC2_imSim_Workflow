@@ -102,9 +102,10 @@ if (not configuration.fake) and configuration.singularity_download:
 
   singularity_future.result()
 
-logger.info("generating worklist")
-worklist_future = generate_worklist(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists)
-worklist_future.result()
+if configuration.worklist_generate:
+  logger.info("generating worklist")
+  worklist_future = generate_worklist(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists)
+  worklist_future.result()
 
 logger.info("generating bundles")
 
