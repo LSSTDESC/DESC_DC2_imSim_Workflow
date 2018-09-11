@@ -40,7 +40,7 @@ def run_imsim(instcat, workdir, outdir, processes, low_fidelity,
                                "must be provided.")
         sensor_list = sensor_subset(subset_size, subset_index)
     else:
-        instcat, sensor_list = get_sensor_list(bundle_lists, node_id,
+        instcat, sensor_list, _ = get_sensor_list(bundle_lists, node_id,
                                                visit_index)
 
     logger.info(instcat)
