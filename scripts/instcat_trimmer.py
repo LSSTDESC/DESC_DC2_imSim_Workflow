@@ -15,7 +15,7 @@ def get_object_entries(visit_object, chip_name):
           object_list (list): list containing num of objects to simulate on a given
              chip.
     """
-    return visit_object.get_object_entries(chip_name)
+    return visit_object[chip_name]
 
 def determine_sensor_jobs(instcat_file):
     """Determines which sensors in a given visit need imSim work and returns both the
