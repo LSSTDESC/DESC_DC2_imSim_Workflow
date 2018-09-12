@@ -21,7 +21,7 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    scons
    set -e
    cd ../imSim
-   git checkout v0.3.0-beta
+   git checkout v0.3.1-beta
    scons
    cd ../obs_lsstCam
    git checkout imsim-0.1.0
