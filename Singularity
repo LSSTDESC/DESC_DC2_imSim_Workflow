@@ -16,15 +16,15 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    setup -r imSim -j
    setup -r obs_lsstCam -j
    cd sims_GalSimInterface
-   git checkout u/jchiang/cache_SiliconSensor_objects
+   git checkout u/jchiang/uniqueId_as_string
    set +e
    scons
    set -e
    cd ../imSim
-   git checkout u/jchiang/instcat_memory_fix
+   git checkout v0.3.0-beta
    scons
    cd ../obs_lsstCam
-   git checkout u/jchiang/imsim_crosstalk
+   git checkout imsim-0.1.0
    scons
    cd ..
    git clone https://github.com/LSSTDESC/ALCF_1.2i.git
