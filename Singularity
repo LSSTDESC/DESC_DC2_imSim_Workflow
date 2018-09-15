@@ -22,7 +22,7 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    set +e
    scons
    set -e
-   cd sims_GalSimInterface
+   cd ../sims_GalSimInterface
    git checkout u/jchiang/uniqueId_as_string
    set +e
    scons
