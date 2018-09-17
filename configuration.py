@@ -13,13 +13,13 @@ from parsl.executors.threads import ThreadPoolExecutor
 #THETA_QUEUE="default"
 #WALLTIME="02:58:30"
 
-#THETA_NODES=2048
-#THETA_QUEUE="R.LSSTADSP_DESC"
-#WALLTIME="23:58:00"
+THETA_NODES=500
+THETA_QUEUE="R.LSSTADSP_DESC"
+WALLTIME="20:00:00"
 
-THETA_NODES=8
-THETA_QUEUE="debug-flat-quad"
-WALLTIME="00:58:00"
+#THETA_NODES=8
+#THETA_QUEUE="debug-flat-quad"
+#WALLTIME="00:58:00"
 
 #THETA_NODES=128
 #THETA_QUEUE="default"
@@ -34,13 +34,14 @@ work_and_out_path = "/projects/LSSTADSP_DESC/benc/"
 # singularity image containing the ALCF_1.2i distro
 singularity_img = work_and_out_path + "ALCF_1.2.simg"
 
-singularity_url = "shub://benclifford/ALCF_1.2i"
+#singularity_url = "shub://benclifford/ALCF_1.2i"
+singularity_url = "shub://LSSTDESC/ALCF_1.2i:latest"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
 # probably should be set to True unless testing
 # interactively
-singularity_download = False
+singularity_download = True
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
@@ -50,7 +51,8 @@ worklist_generate = False
 fake = False
 
 
-inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
+inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
+# inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/benc/2.0i_sample/inputs/"
 
 
@@ -67,7 +69,7 @@ trickle_loop_seconds = 60
 
 # the (expensive to generate) overall work list, which will include
 # everything we think needs to have been done, whether it has or not
-original_work_list = "/projects/LSSTADSP_DESC/benc/parsl-original-work.json"
+original_work_list = "/projects/LSSTADSP_DESC/benc/backup_worklist_2.0_153.json"
 
 # this is where (posisbly auto-generated) bundle list will be stored
 bundle_lists = "/projects/LSSTADSP_DESC/benc/parsl-auto-bundles.json"
@@ -96,7 +98,8 @@ module swap cray-mpich cray-mpich-abi
 export LD_LIBRARY_PATH=${CRAY_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH                                                                                                                                                                                
                                                                                                                                                                                                                                                
 ulimit -c unlimited                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                               
+                          
+export SINGULARITY_HOME=/home/benc                                                                                                                                                                                                                     
 export OMP_NUM_THREADS=1"""
 
 mpi_executor = MPIExecutor(

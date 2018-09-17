@@ -29,8 +29,9 @@ bundles = sys.argv[3]
 # Note that the paths here are important; these need to match your later ingest into imSim for
 # singularity input binds.
 
-print("parsl-initial-bundle: globbing")
-instcat_list_a = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(inst_cat_root))[0:10]
+globstr = '{}/0*/phosim_cat*.txt'.format(inst_cat_root)
+print("parsl-initial-bundle: globbing {}".format(globstr))
+instcat_list_a = glob.glob(globstr)
 print("parsl-initial-bundle: globbed: {}".format(instcat_list_a))
 print("parsl-initial-bundle: globbed {} instance catalogs".format(len(instcat_list_a)))
 

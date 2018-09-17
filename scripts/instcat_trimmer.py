@@ -61,7 +61,7 @@ def determine_sensor_jobs(instcat_file):
              'R:4,3 S:0,0', 'R:4,3 S:0,1', 'R:4,3 S:0,2', 'R:4,3 S:1,0', 'R:4,3 S:1,1', 'R:4,3 S:1,2',
              'R:4,3 S:2,0', 'R:4,3 S:2,1', 'R:4,3 S:2,2']
 
-    visit_object = imsim.trim.InstCatTrimmer(instcat_file, numRows=int(7e6))
+    visit_object = imsim.trim.InstCatTrimmer(instcat_file, numRows=int(7e6), sensor_list = chip_list)
 
     object_lists = {chip_name: get_object_entries(visit_object, chip_name) for chip_name in chip_list}
     job_list = [chip_name for chip_name in object_lists if object_lists[chip_name]]

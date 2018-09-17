@@ -59,8 +59,7 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
       inst_cat_path = run[0]
       sensor_count = len(run[1]) # TODO: use instead of nthreads
 
-      (inst_cat_dir1, phosim_txt_fn) = os.path.split(inst_cat_path)
-      (inst_cat_path_trimmed, instcat_const) = os.path.split(inst_cat_dir1)
+      (inst_cat_path_trimmed, phosim_txt_fn) = os.path.split(inst_cat_path)
 
       stuff_b = inst_cat_path_trimmed.replace(inst_cat_root, "outputs/", 1)
       pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
@@ -71,7 +70,7 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
       # extract the numeric part of that
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
 
-      body_cmd += "singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
+      body_cmd += "singularity run -B {},{} {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
 
     whole_cmd = prefix_cmd + body_cmd + postfix_cmd
