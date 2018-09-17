@@ -10,7 +10,7 @@ from parsl.app.app import bash_app
 import logging
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("parsl.appworkflow")
 
 parsl.set_stream_logger()
 parsl.set_stream_logger(__name__)
@@ -48,24 +48,36 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
     import os
     import re
 
-    run = bundle[0]
-    inst_cat_path = run[0]
-    sensor_count = len(run[1]) # TODO: use instead of nthreads
+    prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; "
+    postfix_cmd = " echo waiting ; wait ; echo done waiting "
 
-    (inst_cat_dir1, phosim_txt_fn) = os.path.split(inst_cat_path)
-    (inst_cat_path_trimmed, instcat_const) = os.path.split(inst_cat_dir1)
+    body_cmd = ""
 
-    stuff_b = inst_cat_path_trimmed.replace(inst_cat_root, "outputs/", 1)
-    pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
-    outdir = pathbase + ""   # just in case we want to separate these
-    workdir = pathbase + ""
-    visit_index = 0
+    for visit_index in range(0, len(bundle)):
 
-    # filename in phosim_txt_fn will look like: phosim_cat_1909355.txt
-    # extract the numeric part of that
-    (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
+      run = bundle[visit_index]
+      inst_cat_path = run[0]
+      sensor_count = len(run[1]) # TODO: use instead of nthreads
 
-    return "echo BENC: info pre singularity; date ;  echo BENC sensor count is {} ; echo BENC id; id ; echo BENC HOME = $HOME; echo BENC hostnaee ; hostname ; echo BENC ls ~ ; ls ~ ; echo BENC launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, nthreads, bundle_lists, nodeid, visit_index)
+      (inst_cat_dir1, phosim_txt_fn) = os.path.split(inst_cat_path)
+      (inst_cat_path_trimmed, instcat_const) = os.path.split(inst_cat_dir1)
+
+      stuff_b = inst_cat_path_trimmed.replace(inst_cat_root, "outputs/", 1)
+      pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
+      outdir = pathbase + ""   # just in case we want to separate these
+      workdir = pathbase + ""
+
+      # filename in phosim_txt_fn will look like: phosim_cat_1909355.txt
+      # extract the numeric part of that
+      (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
+
+      body_cmd += "singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
+
+
+    whole_cmd = prefix_cmd + body_cmd + postfix_cmd
+    print("whole_cmd: %{}".format(whole_cmd))
+    return whole_cmd
+    # return "echo DEBUG: info pre singularity; date ;  echo DEBUG: sensor count is {} ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, nthreads, bundle_lists, nodeid, visit_index)
 
 def trickle_submit(bundle_lists, task_info):
 
