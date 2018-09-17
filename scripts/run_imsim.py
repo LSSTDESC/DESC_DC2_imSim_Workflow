@@ -76,9 +76,8 @@ def run_imsim(instcat, workdir, outdir, processes, low_fidelity,
                                     apply_sensor_model=apply_sensor_model, 
                                     create_centroid_file=True, 
                                     file_id=file_id, 
-                                    node_id=node_id,
                                     log_level=log_level)
-    image_simulator.run(processes=processes)
+    image_simulator.run(processes=processes, node_id=node_id)
 
     os.chdir(cwd)
 
