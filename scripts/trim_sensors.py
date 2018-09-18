@@ -1,12 +1,9 @@
 import warnings
-import sqlite3
 import numpy as np
 from lsst.afw import cameraGeom
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     from lsst.sims.coordUtils import getCornerRaDec
-    from lsst.sims.catUtils.utils import ObservationMetaDataGenerator
-    from lsst.sims.utils import getRotSkyPos
 import desc.imsim
 
 class Run20Region:
@@ -34,11 +31,11 @@ class Run20Region:
 
         sensors = []
         for det in list(camera):
-            det_name = det.getName()
             if det.getType() != cameraGeom.SCIENCE:
                 continue
+            det_name = det.getName()
             corners = np.array(getCornerRaDec(det_name, camera, obs_md))
-            if any([run20_region.contains(*corner) for corner in corners]):
+            if any([self.contains(*corner) for corner in corners]):
                 sensors.append(det_name)
         return sensors
 
