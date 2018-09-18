@@ -26,28 +26,9 @@ class Run20Region:
             return False
         return True
 
-    def trim_sensors(self, visit, opsim_db='/global/projecta/projectdirs/lsst/groups/SSim/DC2/minion_1016_desc_dithered_v4.db'):
-        obs_gen = ObservationMetaDataGenerator(database=opsim_db,
-                                               driver='sqlite')
-        with sqlite3.connect(opsim_db) as conn:
-            curs = conn.execute('''select descDitheredRA, descDitheredDec,
-                                   descDitheredRotTelPos from summary
-                                   where obshistid={}'''.format(visit))
-            ra, dec, rottelpos = [np.degrees(x) for x in curs][0]
-
-        # An ObservationMetaData object used to pass the pointing info to
-        # the function in lsst.sims.coordUtils that provides the CCD
-        # coordinates.
-        obs_md = obs_gen.getObservationMetaData(obsHistID=visit,
-                                                boundType='circle',
-                                                boundLength=0.1)[0]
-        obs_md.pointingRA = ra
-        obs_md.pointingDec = dec
-        obs_md.OpsimMetaData['rotTelPos'] = rottelpos
-
-        # Convert the rotation angle of the sky relative to the
-        # telescope to the sky angle relative to the camera.
-        obs_md.rotSkyPos = getRotSkyPos(ra, dec, obs_md, rottelpos)
+    def trim_sensors(self, instcat):
+        obs_md, _, _ \
+            = desc.imsim.parsePhoSimInstanceFile(instcat, (), numRows=50)
 
         camera = desc.imsim.get_obs_lsstSim_camera()
 
@@ -64,6 +45,7 @@ class Run20Region:
 if __name__ == '__main__':
     visit = 2188
     run20_region = Run20Region()
-    sensors = run20_region.trim_sensors(visit)
+    instcat = '/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/z-WFD/0002188_test/instCat/phosim_cat_2188.txt'
+    sensors = run20_region.trim_sensors(instcat)
     print(len(sensors))
     print(sensors)
