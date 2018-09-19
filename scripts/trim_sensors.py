@@ -64,12 +64,12 @@ class Run20Region:
                 continue
             det_name = det.getName()
             corners = np.array(getCornerRaDec(det_name, camera, obs_md))
-            if any([self.contains(*corner) for corner in corners]):
+            if (any([self.contains(*corner) for corner in corners]) or
+                self.contains_region_corners(corners)):
                 sensors.append(det_name)
         return sensors
 
 if __name__ == '__main__':
-    visit = 2188
     run20_region = Run20Region()
     instcat = '/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/z-WFD/0002188_test/instCat/phosim_cat_2188.txt'
     sensors = run20_region.trim_sensors(instcat)
