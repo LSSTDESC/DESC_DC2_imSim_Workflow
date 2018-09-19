@@ -156,14 +156,14 @@ def check_job_success(infile, outpath, restartpath):
             files = glob.glob(outpath+searchstring+'*')
             for i in range(len(sensors)):
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
-                gz_sensorstr='R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
+                fits_sensorstr='R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
                 ckpt_sensorstr='R_'+sensor_nums[0]+'_'+sensor_nums[1]+'_S_'+sensor_nums[2]+'_'+sensor_nums[3]
-                matchinggz = [s for s in files if gz_sensorstr in s]
-                check_gz = [s for s in matchinggz if 'fits.gz' in s]
+                matchingfits = [s for s in files if fits_sensorstr in s]
+                check_fits = [s for s in matchingfits if 'fits' in s]
                 matchingckpt = [s for s in files if ckpt_sensorstr in s]
                 check_ckpt = [s for s in matchingckpt if '.ckpt' in s]
 
-                if check_gz and not check_ckpt:
+                if check_fits:
                     sensors[i] = []
                     numobjs[i] = []
                 else:
