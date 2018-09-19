@@ -18,8 +18,8 @@ def determine_instcat_work(instcat_list, outfile):
     sensors_list = [run20_region.trim_sensors(instcat) for instcat in instcat_list]
     work_data = [ [instcat, sensors] for (instcat, sensors) in zip(instcat_list, sensors_list)]
     for work in work_data:
-		numobj = [0 for sensor in work[1]]
-		work.append(numobj)
+        numobj = [0 for sensor in work[1] ]
+        work.append(numobj)
 
     with open(outfile, 'w') as fp:
         json.dump(work_data, fp)
