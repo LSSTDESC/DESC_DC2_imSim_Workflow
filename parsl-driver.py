@@ -48,7 +48,10 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
     import os
     import re
 
-    prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; "
+    prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; ulimit -Sv 120000000 ; "
+
+    debugger_cmd = " (while true; do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 1m ; done ) & "
+
     postfix_cmd = " echo waiting ; wait ; echo done waiting "
 
     body_cmd = ""
@@ -73,7 +76,7 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
       body_cmd += "singularity run -B {},{} {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
 
-    whole_cmd = prefix_cmd + body_cmd + postfix_cmd
+    whole_cmd = prefix_cmd + debugger_cmd + body_cmd + postfix_cmd
     print("whole_cmd: %{}".format(whole_cmd))
     return whole_cmd
     # return "echo DEBUG: info pre singularity; date ;  echo DEBUG: sensor count is {} ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, nthreads, bundle_lists, nodeid, visit_index)

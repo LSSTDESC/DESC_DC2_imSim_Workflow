@@ -28,8 +28,8 @@ with open(worklist) as fp:
 # We assume 10 GB memory per imSim call + 1 GB per thread + 5 GB floating for sharp increases.
 # This may vary depending on your version of imSim and architecture.
 
-max_threads_node = 64
-max_instances_node = 10
+max_threads_node = 32
+max_instances_node = 1
 
 print("parsl-initial-bundle: Bundling first pass...")
 bundle_list_a = jbu.determine_bundles(worklist_a, max_threads_node, max_instances_node)

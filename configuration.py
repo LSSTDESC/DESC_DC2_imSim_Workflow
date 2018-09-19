@@ -13,17 +13,17 @@ from parsl.executors.threads import ThreadPoolExecutor
 #THETA_QUEUE="default"
 #WALLTIME="02:58:30"
 
-THETA_NODES=500
-THETA_QUEUE="R.LSSTADSP_DESC"
-WALLTIME="20:00:00"
+#THETA_NODES=2048
+#THETA_QUEUE="R.LSSTADSP_DESC"
+#WALLTIME="16:30:00"
 
-#THETA_NODES=8
-#THETA_QUEUE="debug-flat-quad"
-#WALLTIME="00:58:00"
+THETA_NODES=8
+THETA_QUEUE="debug-flat-quad"
+WALLTIME="00:58:00"
 
-#THETA_NODES=128
+#THETA_NODES=256
 #THETA_QUEUE="default"
-#WALLTIME="00:30:00"
+#WALLTIME="05:50:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
@@ -51,7 +51,8 @@ worklist_generate = False
 fake = False
 
 
-inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
+inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_180917/"
+# inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/benc/2.0i_sample/inputs/"
 
@@ -69,7 +70,9 @@ trickle_loop_seconds = 60
 
 # the (expensive to generate) overall work list, which will include
 # everything we think needs to have been done, whether it has or not
-original_work_list = "/projects/LSSTADSP_DESC/benc/backup_worklist_2.0_153.json"
+#original_work_list = "/projects/LSSTADSP_DESC/benc/backup_worklist_2.0_153.json"
+# original_work_list = "/projects/LSSTADSP_DESC/benc/full_worklist.json"
+original_work_list = "/projects/LSSTADSP_DESC/benc/worklist-gen3.json"
 
 # this is where (posisbly auto-generated) bundle list will be stored
 bundle_lists = "/projects/LSSTADSP_DESC/benc/parsl-auto-bundles.json"
@@ -96,9 +99,9 @@ overrides="""module load intelpython35/2017.0.035
 source activate theta_intel_test1 
 module swap cray-mpich cray-mpich-abi                                                                                                                                                                                                          
 export LD_LIBRARY_PATH=${CRAY_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH                                                                                                                                                                                
-                                                                                                                                                                                                                                               
-ulimit -c unlimited                                                                                                                                                                                                                            
-                          
+ulimit -c unlimited
+ulimit -Sv 120000000
+
 export SINGULARITY_HOME=/home/benc                                                                                                                                                                                                                     
 export OMP_NUM_THREADS=1"""
 
