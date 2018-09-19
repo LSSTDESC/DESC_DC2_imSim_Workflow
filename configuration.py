@@ -17,13 +17,13 @@ from parsl.executors.threads import ThreadPoolExecutor
 #THETA_QUEUE="R.LSSTADSP_DESC"
 #WALLTIME="16:30:00"
 
-THETA_NODES=8
-THETA_QUEUE="debug-flat-quad"
-WALLTIME="00:58:00"
+#THETA_NODES=8
+#THETA_QUEUE="debug-flat-quad"
+#WALLTIME="00:58:00"
 
-#THETA_NODES=256
-#THETA_QUEUE="default"
-#WALLTIME="05:50:00"
+THETA_NODES=256
+THETA_QUEUE="default"
+WALLTIME="05:50:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
