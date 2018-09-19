@@ -2,7 +2,6 @@
 Module to find the sensors that overlap the DC2 simulation region for a
 given visit.
 """
-
 import warnings
 import numpy as np
 from lsst.afw import cameraGeom
@@ -68,6 +67,16 @@ class Run20Region:
                 self.contains_region_corners(corners)):
                 sensors.append(det_name)
         return sensors
+
+    def plot_boundary(self, color='blue', linestyle='--'):
+        import matplotlib.pyplot as plt
+        dec1 = np.linspace(-44.33, -27.25, 100)
+        dec2 = dec1[-1::-1]
+        ra1 = self._ra_mid - self._dra(dec1)
+        ra2 = self._ra_mid + self._dra(dec2)
+        ra = np.concatenate((ra1, ra2, ra1[:1]))
+        dec = np.concatenate((dec1, dec2, dec1[:1]))
+        plt.plot(ra, dec, color=color, linestyle=linestyle)
 
 if __name__ == '__main__':
     run20_region = Run20Region()
