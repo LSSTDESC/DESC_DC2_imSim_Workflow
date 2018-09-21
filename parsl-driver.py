@@ -50,7 +50,7 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
 
     prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; ulimit -Sv 120000000 ; "
 
-    debugger_cmd = " (while true; do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 1m ; done ) & "
+    debugger_cmd = " (while true; do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 3m ; done ) & "
 
     postfix_cmd = " echo waiting ; wait ; echo done waiting "
 

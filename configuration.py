@@ -21,9 +21,13 @@ from parsl.executors.threads import ThreadPoolExecutor
 #THETA_QUEUE="debug-flat-quad"
 #WALLTIME="00:58:00"
 
-THETA_NODES=256
+#THETA_NODES=256
+#THETA_QUEUE="default"
+#WALLTIME="05:50:00"
+
+THETA_NODES=2048
 THETA_QUEUE="default"
-WALLTIME="05:50:00"
+WALLTIME="23:58:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
@@ -74,7 +78,7 @@ trickle_loop_seconds = 60
 # original_work_list = "/projects/LSSTADSP_DESC/benc/full_worklist.json"
 original_work_list = "/projects/LSSTADSP_DESC/benc/worklist-gen3.json"
 
-# this is where (posisbly auto-generated) bundle list will be stored
+# this is where (possibly auto-generated) bundle list will be stored
 bundle_lists = "/projects/LSSTADSP_DESC/benc/parsl-auto-bundles.json"
 
 # a temp working directory for the bundler
