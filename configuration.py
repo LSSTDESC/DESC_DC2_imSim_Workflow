@@ -26,8 +26,8 @@ from parsl.executors.threads import ThreadPoolExecutor
 #WALLTIME="05:50:00"
 
 THETA_NODES=2048
-THETA_QUEUE="default"
-WALLTIME="23:58:00"
+THETA_QUEUE="R.LSSTADSP_DESC"
+WALLTIME="47:28:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
@@ -76,16 +76,16 @@ trickle_loop_seconds = 60
 # everything we think needs to have been done, whether it has or not
 #original_work_list = "/projects/LSSTADSP_DESC/benc/backup_worklist_2.0_153.json"
 # original_work_list = "/projects/LSSTADSP_DESC/benc/full_worklist.json"
-original_work_list = "/projects/LSSTADSP_DESC/benc/worklist-gen3.json"
+original_work_list = work_and_out_path+"worklist-gen3.json"
 
 # this is where (possibly auto-generated) bundle list will be stored
-bundle_lists = "/projects/LSSTADSP_DESC/benc/parsl-auto-bundles.json"
+bundle_lists = work_and_out_path+"parsl-auto-bundles.json"
 
 # a temp working directory for the bundler
-bundler_restart_path = "/projects/LSSTADSP_DESC/benc/bundler-restart-tmp/"
+bundler_restart_path = work_and_out_path+"bundler-restart-tmp/"
 
 # ip (or hostname, probably) of the submitting host
-SUBMIT_HOST_IP = "10.236.1.193"
+SUBMIT_HOST_IP = "10.236.1.194"
 
 # parameters above are ones you're likely to want
 # to change
@@ -97,16 +97,16 @@ RESULT_URL = "tcp://{}:50006".format(SUBMIT_HOST_IP)
 
 launch_cmd='which python3; \
 aprun -b -cc depth -j 1 -d 64 -n $(($COBALT_PARTSIZE * {tasks_per_node})) -N {tasks_per_node} \
-python3 /home/benc/desc2.0i/parsl/parsl/executors/mpix/fabric_singlethreaded.py -d --task_url={task_url} --result_url={result_url}'
+python3 /projects/LSSTADSP_DESC/Run2.0i-parsl/parsl/parsl/executors/mpix/fabric_singlethreaded.py -d --task_url={task_url} --result_url={result_url}'
 
 overrides="""module load intelpython35/2017.0.035                                                                                                                                                                              
-source activate theta_intel_test1 
+source activate parsl_env
 module swap cray-mpich cray-mpich-abi                                                                                                                                                                                                          
 export LD_LIBRARY_PATH=${CRAY_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH                                                                                                                                                                                
 ulimit -c unlimited
 ulimit -Sv 120000000
 
-export SINGULARITY_HOME=/home/benc                                                                                                                                                                                                                     
+export SINGULARITY_HOME=/home/antoniov                                                                                                                                                                                                                     
 export OMP_NUM_THREADS=1"""
 
 mpi_executor = MPIExecutor(

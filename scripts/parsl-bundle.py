@@ -43,7 +43,7 @@ print("parsl-initial-bundle: Checking job success...")
 jbu.check_job_success(bundles, outpath, restartpath)
 
 print("parsl-initial-bundle: Determining remaining jobs...")
-worklist_new = jbu.determine_remaining_jobs("/home/benc/desc2.0i/ALCF_1.2i/empty-worklist.json", restartpath)
+worklist_new = jbu.determine_remaining_jobs("/projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/empty-worklist.json", restartpath)
 
 print("parsl-initial-bundle: Bundling second pass...")
 

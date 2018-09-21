@@ -26,11 +26,11 @@ parsl.load(configuration.parsl_config)
 
 @bash_app(executors=['submit-node'])
 def generate_worklist(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
-    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
+    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
 @bash_app(executors=['submit-node'])
 def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    return "singularity exec -B {},{} {} /home/benc/desc2.0i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
+    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 
 @bash_app(executors=['submit-node'])
@@ -73,7 +73,7 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
       # extract the numeric part of that
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
 
-      body_cmd += "singularity run -B {},{} {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
+      body_cmd += "singularity run -B {},{},/projects/LSSTADSP_DESC {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
 
     whole_cmd = prefix_cmd + debugger_cmd + body_cmd + postfix_cmd
