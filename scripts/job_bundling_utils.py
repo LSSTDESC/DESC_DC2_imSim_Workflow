@@ -2,6 +2,7 @@ import numpy as np
 import json
 import sys
 import glob
+import os
 
 def determine_bundles(sample, max_threads_node=64, max_instances_node=10):
     """Given a sample which is a series of three tuple of
@@ -152,8 +153,9 @@ def check_job_success(infile, outpath, restartpath):
         for visit, sensors, numobjs in input_data[node]:
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
-            searchstring = str('/'.join(visit.split('/')[-4:-2])+'/')
-            files = glob.glob(outpath+searchstring+'*')
+            searchstring = visit.split('/')[-2]
+            searchpath = os.path.join(outpath,searchstring)
+            files = glob.glob(searchpath+'/*')
             for i in range(len(sensors)):
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
                 fits_sensorstr='R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
