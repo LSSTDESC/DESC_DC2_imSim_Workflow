@@ -9,26 +9,33 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    setup lsst_sims
    mkdir /DC2
    cd /DC2
+   git clone https://github.com/lsst/sims_photUtils.git
    git clone https://github.com/lsst/sims_skybrightness.git
    git clone https://github.com/lsst/sims_GalSimInterface.git
    git clone https://github.com/LSSTDESC/imSim.git
    git clone https://github.com/lsst/obs_lsstCam.git
+   setup -r sims_photUtils -j
    setup -r sims_skybrightness -j
    setup -r sims_GalSimInterface -j
    setup -r imSim -j
    setup -r obs_lsstCam -j
-   cd sims_skybrightness
+   cd sims_photUtils
+   git checkout ba5b942a9359e7eceea918e8663e6225cfb49dfc
+   set +e
+   scons
+   set -e
+   cd ../sims_skybrightness
    git checkout fdd58c7eb0414e89f5c7fa12eccf8809acabcf92
    set +e
    scons
    set -e
    cd ../sims_GalSimInterface
-   git checkout u/jchiang/uniqueId_as_string
+   git checkout u/jchiang/rmjarvis/simple_faint
    set +e
    scons
    set -e
    cd ../imSim
-   git checkout v0.3.5-beta
+   git checkout u/jchiang/chip_downselection_memory_reduction
    scons
    cd ../obs_lsstCam
    git checkout imsim-0.1.0
