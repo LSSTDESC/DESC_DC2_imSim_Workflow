@@ -30,12 +30,11 @@ From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
    scons
    set -e
    cd ../sims_GalSimInterface
-   git checkout u/jchiang/rmjarvis/simple_faint
    set +e
    scons
    set -e
    cd ../imSim
-   git checkout u/jchiang/chip_downselection_memory_reduction
+   git checkout dc2_run2.0_rc
    scons
    cd ../obs_lsstCam
    git checkout imsim-0.1.0
