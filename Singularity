@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: lsstdesc/stack-sims:w_2018_26-sims_2_9_0
+From: lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
 
 %post
    set +e
