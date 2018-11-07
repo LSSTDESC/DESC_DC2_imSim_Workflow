@@ -35,6 +35,7 @@ From: lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
    set -e
    cd ../imSim
    git checkout dc2_run2.0_rc
+   sed -i -e 's/_stepK/_getStepK/g' python/desc/imsim/atmPSF.py
    scons
    cd ../obs_lsstCam
    git checkout imsim-0.1.0
@@ -52,6 +53,8 @@ From: lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
    setup -r sims_GalSimInterface -j
    setup -r imSim -j
    setup -r obs_lsstCam -j
+   setup -r sims_skybrightness -j
+   setup -r sims_photUtils -j
    cd
    export OMP_NUM_THREADS=1
 
