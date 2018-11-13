@@ -1,5 +1,5 @@
-#FROM lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
-FROM lsstdesc/stack-sims:w_2018_26-sims_2_9_0
+FROM lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
+#FROM lsstdesc/stack-sims:w_2018_26-sims_2_9_0
 RUN set +e &&\
   source scl_source enable devtoolset-6 &&\
   set -e &&\ 
