@@ -9,17 +9,24 @@ From: lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
    setup lsst_sims
    mkdir /DC2
    cd /DC2
+   git clone https://github.com/GalSim-developers/GalSim.git
    git clone https://github.com/lsst/sims_photUtils.git
    git clone https://github.com/lsst/sims_skybrightness.git
    git clone https://github.com/lsst/sims_GalSimInterface.git
    git clone https://github.com/LSSTDESC/imSim.git
    git clone https://github.com/lsst/obs_lsstCam.git
+   setup -r GalSim -j
    setup -r sims_photUtils -j
    setup -r sims_skybrightness -j
    setup -r sims_GalSimInterface -j
    setup -r imSim -j
    setup -r obs_lsstCam -j
-   cd sims_photUtils
+   cd GalSim
+   git checkout 3af1a30bdb3f2ac0d0abcc957b175d8d01dae79c
+   set +e
+   scons
+   set -e
+   cd ../sims_photUtils
    git checkout ba5b942a9359e7eceea918e8663e6225cfb49dfc
    set +e
    scons
@@ -50,6 +57,7 @@ From: lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
    source /opt/lsst/software/stack/loadLSST.bash
    setup lsst_sims
    cd /DC2
+   setup -r GalSim -j
    setup -r sims_GalSimInterface -j
    setup -r imSim -j
    setup -r obs_lsstCam -j
