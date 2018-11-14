@@ -57,9 +57,6 @@ From: lsstdesc/stack-sims:w_2018_35-sims_2_10_0-v2
    setup -r obs_lsstCam -j
    setup -r sims_skybrightness -j
    setup -r sims_photUtils -j
-   cd GalSim
-   python setup.py install
-   cd ..
    export OMP_NUM_THREADS=1
 
 %runscript
