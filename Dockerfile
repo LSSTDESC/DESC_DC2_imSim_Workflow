@@ -5,8 +5,8 @@ RUN set +e &&\
   set -e &&\ 
   source /opt/lsst/software/stack/loadLSST.bash &&\
   setup lsst_sims &&\
-  mkdir -p ~/DC2 &&\
-  cd ~/DC2 &&\
+  mkdir -p /DC2 &&\
+  cd /DC2 &&\
   git clone https://github.com/lsst/sims_photUtils.git &&\
   git clone https://github.com/lsst/sims_skybrightness.git &&\
   git clone https://github.com/lsst/sims_GalSimInterface.git &&\
@@ -39,6 +39,6 @@ RUN set +e &&\
   cd ../obs_lsstCam &&\
   git checkout imsim-0.1.0 &&\
   scons
-COPY docker_run.sh /docker_run.sh
-ENTRYPOINT ["/docker_run.sh"]
+COPY docker_run.sh /DC2/docker_run.sh
+ENTRYPOINT ["/DC2/docker_run.sh"]
 CMD ["-h"]
