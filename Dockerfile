@@ -38,6 +38,7 @@ RUN set +e &&\
   scons &&\
   cd ../obs_lsstCam &&\
   git checkout imsim-0.1.0 &&\
-  scons &&\
-  cd ~
-ENTRYPOINT python ~/DC2/ALCF_1.2i/scripts/run_imsim.py
+  scons
+COPY docker_run.sh /docker_run.sh
+ENTRYPOINT ["/docker_run.sh"]
+CMD ["-h"]
