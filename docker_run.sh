@@ -9,4 +9,6 @@ setup -r sims_GalSimInterface -j
 setup -r imSim -j
 setup -r obs_lsstCam -j
 
-python /home/lsst/DC2/ALCF_1.2i/scripts/run_imsim.py "$@"
+echo docker_run.sh: will run command: "$@" >&2
+
+$@

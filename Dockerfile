@@ -42,4 +42,4 @@ RUN set +e &&\
   scons
 COPY docker_run.sh /home/lsst/DC2/docker_run.sh
 ENTRYPOINT ["/home/lsst/DC2/docker_run.sh"]
-CMD ["-h"]
+CMD ["echo You must specify a command to run inside the LSST ALCF container"]
