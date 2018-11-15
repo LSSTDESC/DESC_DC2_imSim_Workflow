@@ -3,7 +3,7 @@ import json
 import sys
 import glob
 
-def determine_bundles(sample, max_threads_node=64, max_instances_node=10):
+def determine_bundles(sample, max_threads_node=64, max_instances_node=5):
     """Given a sample which is a series of three tuple of
     [instcat, [listofsensors], [listofnumobjs]], calculate
     a semi-optimal bundling onto a given node architecture.
@@ -17,6 +17,8 @@ def determine_bundles(sample, max_threads_node=64, max_instances_node=10):
        bundle_list (dict): a semi-optimal bundling of the above data,
           with each key corresponding to a hardware node.
     """
+
+    sliceint = max_threads_node // (max_instances_node*2) # determines how to cut up hard to fit sections.
 
     thread_counts = [len(item[1]) for item in sample]
 
@@ -60,6 +62,34 @@ def determine_bundles(sample, max_threads_node=64, max_instances_node=10):
                             nodedict = 'node'+str(j+bin_adjust)
                             bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
                             found_fit = 1
+            if found_fit == 0 and thread_counts[idx] < max_threads_node/2:
+                for j in range(0, len(open_bins)):
+                    if found_fit == 0 and thread_counts[idx] > sliceint:
+                        if open_bins[j]+sliceint <= max_threads_node:
+                            if num_fit[j]+1 < max_instances_node:
+                                open_bins[j]+=sliceint
+                                num_fit[j]+=1
+                                temp_sensor = []
+                                temp_num = []
+                                for tempi in range(sliceint):
+                                    temp_sensor.append((sample[idx])[1].pop())
+                                    temp_num.append((sample[idx])[2].pop())
+                                nodedict = 'node'+str(j+bin_adjust)
+                                bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
+                                thread_counts[idx]+=-sliceint
+                    if found_fit == 0 and thread_counts[idx] < sliceint:
+                        if open_bins[j]+thread_counts[idx] <= max_threads_node:
+                            if num_fit[j]+1 < max_instances_node:
+                                open_bins[j]+=thread_counts[idx]
+                                num_fit[j]+=1
+                                temp_sensor = []
+                                temp_num = []
+                                for tempi in range(thread_counts[idx]):
+                                    temp_sensor.append((sample[idx])[1].pop())
+                                    temp_num.append((sample[idx])[2].pop())
+                                nodedict = 'node'+str(j+bin_adjust)
+                                bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
+                                found_fit = 1
         if (found_fit == 0 and thread_counts[idx]>0):
             open_bins.append(thread_counts[idx])
             num_fit.append(1)
