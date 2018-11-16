@@ -34,14 +34,14 @@ ict.determine_instcat_work(instcat_list_a, '/mnt/scripts/instcat_worklist_a.json
 with open('/mnt/scripts/instcat_worklist_a.json') as fp:
     worklist_a = json.load(fp)
 
-# We need to define the max number of threads and max number of instances per node for this. We choose
-# the fiducial values from Theta. Note that the max_instances_node is a non-trivial calculation.
-# We assume 10 GB memory per imSim call + 1 GB per thread + 5 GB floating for sharp increases.
-# This may vary depending on your version of imSim and architecture.
+# we now define key characteristics of the imSim version + architecture.
+mem_per_thread = 2      # the amount of memory a given sensor thread is expected to max out at
+mem_per_instance = 10   # the amount of shared memory an imSim container is expected to have
 
-max_threads_node = 64
-max_instances_node = 10
-bundle_list_a = jbu.determine_bundles(worklist_a, max_threads_node, max_instances_node)
+mem_per_node = 96-5     # the available memory on a compute node to target for use, minus some leeway
+threads_per_node = 68*4 # the number of available threads to be used on a given node
+
+bundle_list_a = jbu.determine_bundles(worklist_a, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
 
 # This bundle list can be saved and used for your workflow of choice!
 with open('/mnt/scripts/bundle_worklist_a.json', 'w') as fp:
@@ -71,7 +71,7 @@ with open('/mnt/scripts/bundle_worklist_b.json', 'w') as fp:
 
 # And now let's combine THIS with our restart data to generate a new master bundling.
 worklist_new = jbu.determine_remaining_jobs('/mnt/scripts/bundle_worklist_b.json', restartpath)
-bundle_list_new = jbu.determine_bundles(worklist_new, max_threads_node, max_instances_node)
+bundle_list_new = jbu.determine_bundles(worklist_new, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
 
 # And we can just save this new work list!
 with open('/mnt/scripts/bundle_worklist_new.json', 'w') as fp:

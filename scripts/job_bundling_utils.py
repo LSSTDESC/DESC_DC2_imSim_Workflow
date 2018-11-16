@@ -58,45 +58,25 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
     for idx in sort_idx:
         found_fit = 0
         if (open_bins and thread_counts[idx]>0):
-            # loop over existing bins to find a complete fit.
-            for j in range(0, len(open_bins)):
-                if found_fit == 0:
-                    # first define two tests: the threadcount test and the memcount test
-                    threadcount = open_bins[j]+thread_counts[idx]
-                    instancecount = num_fit[j]+1
-                    threadcount_test = threadcount <= max_threads_node
-                    memcount = mem_per_thread*threadcount + mem_per_instance*instancecount
-                    memcount_test = memcount <= max_mem_node                    
-                    # if an open bin is availaible to fit all threads, try to fit all the threads
-                    if threadcount_test == True and memcount_test == True: 
-                        open_bins[j]+=thread_counts[idx]
-                        num_fit[j]+=1
-                        temp_sensor = []
-                        temp_num = []
-                        for tempi in range(thread_counts[idx]):
-                            temp_sensor.append((sample[idx])[1].pop())
-                            temp_num.append((sample[idx])[2].pop())
-                        nodedict = 'node'+str(j+bin_adjust)
-                        bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
-                        found_fit = 1
-			# if this is in a small-ish box, odds are we can slice things up a little to fit.
-            if found_fit == 0 and thread_counts[idx] < max_threads_node/2:
+            if found_fit == 0:
                 for j in range(0, len(open_bins)):
                     # this time, for each j we want to do the same thing, but now we will allow a
                     # variable SLICE to be added. Calculate instance memory the same...
                     instancecount = num_fit[j]+1
+                    # amount of remaining memory AFTER added one new instance.
                     memremaining = max_mem_node - mem_per_thread*open_bins[j] - mem_per_instance*instancecount
                     sliceint = 0
                     # then calcluating the size of a slice that can fit in the box
-                    while memremaining > 0:
-                        memremaining = memremaining - mem_per_thread
-                        sliceint += 1
-                    threadcount = open_bins[j]+sliceint
-                    memcount = mem_per_thread*threadcount + mem_per_instance*instancecount
-                    memcount_test = memcount <= max_mem_node
-                    threadcount_test = threadcount <= max_threads_node
-                    if found_fit == 0 and thread_counts[idx] > sliceint:
-                        if threadcount_test==True and memcount_test ==True:
+                    thread_counter = open_bins[j]
+                    if memremaining >= mem_per_thread and thread_counter < max_threads_node:
+                        while (memremaining >= mem_per_thread) and (thread_counter < max_threads_node) and (sliceint < thread_counts[idx]):
+                            memremaining = memremaining - mem_per_thread
+                            sliceint += 1
+                            thread_counter += 1
+                    # if the number of remaining threads exceeds the allowed slice size, we just fit the slice
+                    # size in.
+                    if found_fit == 0 and thread_counts[idx] > sliceint and sliceint!=0:
+                        if open_bins[j]+sliceint <= max_threads_node:
                             open_bins[j]+=sliceint
                             num_fit[j]+=1
                             temp_sensor = []
@@ -107,19 +87,25 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
                             nodedict = 'node'+str(j+bin_adjust)
                             bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
                             thread_counts[idx]+=-sliceint
-                    if found_fit == 0 and thread_counts[idx] < sliceint:
-                        if threadcount_test==True and memcount_test==True:
-                           open_bins[j]+=thread_counts[idx]
-                           num_fit[j]+=1
-                           temp_sensor = []
-                           temp_num = []
-                           for tempi in range(thread_counts[idx]):
-                               temp_sensor.append((sample[idx])[1].pop())
-                               temp_num.append((sample[idx])[2].pop())
-                           nodedict = 'node'+str(j+bin_adjust)
-                           bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
-                           found_fit = 1
-		# if we found no fit yet, stuff it in a box and call it a day.
+                    # if the number of remaining threads is smaller than the allowed slice size, we fit the
+                    # whole piece in.
+                    if found_fit == 0 and thread_counts[idx] <= sliceint and sliceint!=0:
+                        threadcount = open_bins[j]+thread_counts[idx]
+                        threadcount_test = threadcount <= max_threads_node
+                        memcount = threadcount*mem_per_thread + (num_fit[j]+1)*mem_per_instance
+                        memcount_test = memcount <= max_mem_node
+                        if threadcount_test == True and memcount_test == True:
+                            open_bins[j]+=thread_counts[idx]
+                            num_fit[j]+=1
+                            temp_sensor = []
+                            temp_num = []
+                            for tempi in range(thread_counts[idx]):
+                                temp_sensor.append((sample[idx])[1].pop())
+                                temp_num.append((sample[idx])[2].pop())
+                            nodedict = 'node'+str(j+bin_adjust)
+                            bundle_list[nodedict].append(((sample[idx])[0], temp_sensor, temp_num))
+                            found_fit = 1
+        # if we found no fit yet, stuff it in a box and call it a day.
         if (found_fit == 0 and thread_counts[idx]>0):
             open_bins.append(thread_counts[idx])
             num_fit.append(1)
