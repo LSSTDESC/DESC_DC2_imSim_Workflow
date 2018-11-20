@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import json
 import sys
 import glob
@@ -23,12 +24,8 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
     # what the actual max threads are. If this is SMALLER than input max_threads,
     # this is corrected.
     mem=max_mem_node-mem_per_instance
-    thread_counter = 0
-    while mem > 0:
-        mem = mem - mem_per_thread
-        thread_counter+=1
-    if thread_counter < max_threads_node:
-        max_threads_node = thread_counter
+    tmp = math.floor(mem / mem_per_thread)
+    max_threads_node = min(tmp, max_threads_node)
 
     bundle_list = dict()
     bin_counter = 0
