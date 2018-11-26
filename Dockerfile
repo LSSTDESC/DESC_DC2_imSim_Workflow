@@ -10,18 +10,23 @@ RUN set +e &&\
   git clone https://github.com/lsst/sims_GalSimInterface.git &&\
   git clone https://github.com/LSSTDESC/imSim.git &&\
   git clone https://github.com/lsst/obs_lsstCam.git &&\
+  git clone https://github.com/lsst/obs_lsst.git &&\
   git clone https://github.com/LSSTDESC/ALCF_1.2i.git &&\
   git clone https://github.com/GalSim-developers/GalSim.git &&\
   setup -r sims_GalSimInterface -j &&\
   setup -r imSim -j &&\
   setup -r obs_lsstCam -j &&\
-  cd sims_GalSimInterface &&\
+  cd obs_lsst &&\
+  eups declare -r . obs_lsst -t current &&\
+  setup -r . -j &&\
+  scons &&\
+  cd ../sims_GalSimInterface &&\
   git checkout u/jchiang/rmjarvis/simple_faint &&\
   set +e &&\
   scons || echo 'ignored failure' &&\
   set -e &&\
   cd ../imSim &&\
-  git checkout dc2_run2.0_rc &&\
+  git checkout master &&\
   scons &&\
   cd ../obs_lsstCam &&\
   git checkout imsim-0.1.0 &&\
