@@ -47,7 +47,7 @@ class Run20Region:
         ra_min, ra_max = min(ra_vals), max(ra_vals)
         dec_min, dec_max = min(dec_vals), max(dec_vals)
         for ra, dec in self.region_corners:
-            if all([ra > ra_min, ra < ra_min, dec > dec_min, dec < dec_max]):
+            if all([ra > ra_min, ra < ra_max, dec > dec_min, dec < dec_max]):
                 return True
         return False
 
