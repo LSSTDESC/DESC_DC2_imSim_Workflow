@@ -23,16 +23,15 @@ restartpath = sys.argv[5]
 with open(worklist) as fp:
     worklist_a = json.load(fp)
 
-# We need to define the max number of threads and max number of instances per node for this. We choose
-# the fiducial values from Theta. Note that the max_instances_node is a non-trivial calculation.
-# We assume 10 GB memory per imSim call + 1 GB per thread + 5 GB floating for sharp increases.
-# This may vary depending on your version of imSim and architecture.
+# we now define key characteristics of the imSim version + architecture.
+mem_per_thread = 2      # the amount of memory a given sensor thread is expected to max out at
+mem_per_instance = 10   # the amount of shared memory an imSim container is expected to have
 
-max_threads_node = 32
-max_instances_node = 1
+mem_per_node = 96-5     # the available memory on a compute node to target for use, minus some leeway
+threads_per_node = 68*4 # the number of available threads to be used on a given node
 
 print("parsl-initial-bundle: Bundling first pass...")
-bundle_list_a = jbu.determine_bundles(worklist_a, max_threads_node, max_instances_node)
+bundle_list_a = jbu.determine_bundles(worklist_a, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
 
 # This bundle list can be saved and used for your workflow of choice!
 with open(bundles, 'w') as fp:
@@ -47,7 +46,7 @@ worklist_new = jbu.determine_remaining_jobs("/projects/LSSTADSP_DESC/Run2.0i-par
 
 print("parsl-initial-bundle: Bundling second pass...")
 
-bundle_list_new = jbu.determine_bundles(worklist_new, max_threads_node, max_instances_node)
+bundle_list_new = jbu.determine_bundles(worklist_new, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
 
 with open(bundles, 'w') as fp:
     json.dump(bundle_list_new, fp)
