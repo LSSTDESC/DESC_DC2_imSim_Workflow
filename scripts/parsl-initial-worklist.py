@@ -43,7 +43,7 @@ print("parsl-initial-bundle: globbed {} instance catalogs".format(len(instcat_li
 # which is why this is divided into a separate module from the remaining workflow. It
 # can be expensive to run on many groups, but is trivially parallelized (split up the instcat inputs)
 print("parsl-initial-bundle: determining work")
-ict.determine_instcat_work(instcat_list_a, worklist)
+ict.determine_instcat_work_bright(instcat_list_a, worklist)
 print("parsl-initial-bundle: determined work")
 
 sys.exit(0)
