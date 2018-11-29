@@ -24,7 +24,7 @@ RUN set +e &&\
   setup -r . -j &&\
   scons &&\
   cd ../sims_GalSimInterface &&\
-  git checkout u/jchiang/rmjarvis/simple_faint &&\
+  git checkout master &&\
   set +e &&\
   scons || echo 'ignored failure' &&\
   set -e &&\
@@ -41,6 +41,5 @@ RUN set +e &&\
   set +e &&\
   scons -Q WITH_UPS=True EIGEN_DIR=/opt/lsst/software/stack/stack/miniconda3-4.5.4-fcd27eb/Linux64/eigen/3.3.4.lsst1/include &&\
   set -e
-COPY docker_run.sh /DC2/docker_run.sh
-ENTRYPOINT ["/DC2/docker_run.sh"]
+ENTRYPOINT ["/DC2/ALCF_1.2i/docker_run.sh"]
 CMD ["echo You must specify a command to run inside the LSST ALCF container"]
