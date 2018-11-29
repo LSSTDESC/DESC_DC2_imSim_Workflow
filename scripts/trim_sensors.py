@@ -4,6 +4,8 @@ given visit.
 """
 import warnings
 import numpy as np
+import glob
+import os
 from lsst.afw import cameraGeom
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
@@ -66,6 +68,49 @@ class Run20Region:
             if (any([self.contains(*corner) for corner in corners]) or
                 self.contains_region_corners(corners)):
                 sensors.append(det_name)
+        return sensors
+
+    def sort_bright_sensors(self, instcat):
+        obs_md, _, _ \
+            = desc.imsim.parsePhoSimInstanceFile(instcat, (), numRows=50)
+
+        camera = desc.imsim.get_obs_lsstSim_camera()
+
+        sensors = []
+        brightsensor = []
+        visit_path = '/'.join(instcat.split('/')[:-1])
+        bright_list = glob.glob(os.path.join(visit_path, 'bright_stars*'))
+        if bright_list:
+            bright_mags, bright_ra, bright_dec = [], [], []
+            with open(bright_list[0]) as fp:
+                for line in fp:
+                    bright_ra.append(line.split(' ')[2])
+                    bright_dec.append(line.split(' ')[3])
+                    bright_mags.append(line.split(' ')[4])
+        for det in list(camera):
+            brightflag = 0
+            if det.getType() != cameraGeom.SCIENCE:
+                continue
+            det_name = det.getName()
+            corners = np.array(getCornerRaDec(det_name, camera, obs_md))
+            if (any([self.contains(*corner) for corner in corners]) or
+                self.contains_regions_corners(corners)):
+                sensors.append(det_name)
+                if bright_list:
+                    ra_vals, dec_vals = [], []
+                    for corner in corners:
+                        ra_vals.append(corner[0])
+                        dec_vals.append(corner[1])
+                    ra_min, ra_max = min(ra_vals), max(ra_vals)
+                    dec_min, dec_max = min(dec_vals), max(dec_vals)    
+                    for ra, dec in zip(bright_ra, bright_dec):
+                        if all([ra > ra_min, ra < ra_max, dec > dec_min, dec < dec_max]):
+                            brightflag = 1
+                    if brightflag = 1: brightsensor.append(0)
+                    else: brightsensor.append(1)
+        if brightflag:    
+            sensors = [sensor for _, sensor in sorted(zip(sensors, brightsensor))]
+            print('sorted bright objects to top of list')
         return sensors
 
     def plot_boundary(self, color='blue', linestyle='--'):
