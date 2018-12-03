@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-print("parsl-initial-bundle: start")
+#!/usr/bin/env python
+print("parsl-bundle: start")
 import glob
 import json
 import sys
@@ -30,28 +30,34 @@ mem_per_instance = 10   # the amount of shared memory an imSim container is expe
 mem_per_node = 96-5     # the available memory on a compute node to target for use, minus some leeway
 threads_per_node = 68*4 # the number of available threads to be used on a given node
 
-print("parsl-initial-bundle: Bundling first pass...")
+print("parsl-bundle: Bundling first pass...")
 bundle_list_a = jbu.determine_bundles(worklist_a, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
 
 # This bundle list can be saved and used for your workflow of choice!
 with open(bundles, 'w') as fp:
     json.dump(bundle_list_a, fp)
 
-print("parsl-initial-bundle: Checking job success...")
+print("parsl-bundle: Checking job success...")
 
 jbu.check_job_success(bundles, outpath, restartpath)
 
-print("parsl-initial-bundle: Determining remaining jobs...")
-worklist_new = jbu.determine_remaining_jobs("/projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/empty-worklist.json", restartpath)
+print("parsl-bundle: restart path is: {}".format(restartpath))
 
-print("parsl-initial-bundle: Bundling second pass...")
+print("parsl-bundle: Determining remaining jobs...")
+worklist_new = jbu.determine_remaining_jobs("/global/homes/b/bxc/run201811/ALCF_1.2i/empty-worklist.json", restartpath)
+
+print("parsl-bundle: worklist_new has length {}".format(len(worklist_new)))
+if len(worklist_new) > 0:
+    print("parsl-bundle: example (first) entry of worklist_new: {}".format(worklist_new[0]))
+print("parsl-bundle: determine_bundles...")
 
 bundle_list_new = jbu.determine_bundles(worklist_new, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
 
+print("parsl-bundle: bundle_list_new has length {}".format(len(bundle_list_new)))
 with open(bundles, 'w') as fp:
     json.dump(bundle_list_new, fp)
 
-print("parsl-initial-bundle: Done")
+print("parsl-bundle: Done")
 
 sys.exit(0)
 

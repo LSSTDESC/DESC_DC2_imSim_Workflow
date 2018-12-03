@@ -18,6 +18,9 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
        bundle_list (dict): a semi-optimal bundling of the above data,
           with each key corresponding to a hardware node.
     """
+    example = sample[0]
+    print("example is: {} - expecting len(item[1]) to be a thread count".format(example))
+
     thread_counts = [len(item[1]) for item in sample]
 
     # quick loop to determine given an input mem_per_thread and mem_per_instance,
@@ -33,6 +36,8 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
     # first loop. Fill each node to the absolute max number
     # of threads.
     for i in range(0, len(thread_counts)):
+        print("determine_bundles: bin {}".format(bin_counter))
+        print("thread_counts[i] = {}, max_threads_node = {}".format(thread_counts[i], max_threads_node))
         while thread_counts[i] >= max_threads_node:
             thread_counts[i] += -1*max_threads_node
             temp_sensor = []
@@ -43,6 +48,8 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
             nodedict = 'node'+str(bin_counter)
             bundle_list[nodedict]=[((sample[i])[0],temp_sensor,temp_num)]
             bin_counter += 1
+
+    print("determine_bundles: bundle list bin_count is {}".format(bin_counter))
 
     # adjust so we don't look into already "full" bins.
     bin_adjust = bin_counter
@@ -130,6 +137,8 @@ def determine_remaining_jobs(infile, restartpath):
              sensors to simulate, and remaining number of objects to simulate. This
              is the primary input of determine_bundles.
     """
+
+    print("determine_remaining_jobs: will read run data from infile={}".format(infile))
     with open(infile) as json_input:
         run_data = json.load(json_input)
 
@@ -148,26 +157,31 @@ def determine_remaining_jobs(infile, restartpath):
                 temp_numobjs[key] = numobjs
 
     listofrestarts = glob.glob(restartpath+'*.json')
+    print("determine_remaining_jobs: Count of restart files: {}".format(len(listofrestarts)))
     if listofrestarts:
         for restart in listofrestarts:
+            print("determine_remaining_jobs: processing restart file {}".format(restart))
             with open(restart) as json_input:
                 restart_data = json.load(json_input)
             for node in restart_data.keys():
+                print("determine_remaining_jobs: node {} = {}".format(node, restart_data[node]))
                 for visit, sensors, numobjs in restart_data[node]:
                     key = str(visit)
                     if key in temp_sensors:
                         for sensor, numobj in zip(sensors, numobjs):
-                            if numobj:
+                   #         if numobj:
                                 temp_sensors[key].append(sensor)
                                 temp_numobjs[key].append(numobj)
                     else:
                         temp_sensors[key] = []
                         temp_numobjs[key] = [] 
                         for sensor, numobj in zip(sensors, numobjs):
-                            if numobj:
+                   #         if numobj:
                                 temp_sensors[key].append(sensor)
                                 temp_numobjs[key].append(numobj)
     remaining_work = [[key, temp_sensors[key], temp_numobjs[key]] for key in temp_sensors.keys()]
+    print("determine_remaining_jobs: remaining_work has length {}".format(len(remaining_work)))
+    print("determine_remaining_jobs: first remaining_work entry is {}".format(remaining_work[0]))
     return remaining_work
 
 def check_job_success(infile, outpath, restartpath):
@@ -192,6 +206,7 @@ def check_job_success(infile, outpath, restartpath):
         input_data = json.load(fp)
 
     for node in input_data.keys():
+        print("check_job_success: before check, node {}, input_data[node] = {}".format(node, input_data[node]))
         for visit, sensors, numobjs in input_data[node]:
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
@@ -218,9 +233,13 @@ def check_job_success(infile, outpath, restartpath):
                     # TODO: add code to recalculate number of remaining objects using the
                     # sqlite objects made for the sensors.
                     pass
+        print("check_job_success: after check, node {}, input_data[node] = {}".format(node, input_data[node]))
 
     outfilename = (infile.split('/')[-1]).split('.')[0]
-    with open(restartpath+outfilename+'_restart.json', 'w') as outfile:
+    fn = restartpath+outfilename+'_restart.json'
+    print("Writing restart path file: {}".format(fn))
+    print("Restart path file will have {} entries".format(len(input_data)))
+    with open(fn, 'w') as outfile:
         json.dump(input_data, outfile)
     return
 

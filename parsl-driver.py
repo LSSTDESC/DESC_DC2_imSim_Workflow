@@ -9,6 +9,7 @@ from parsl.app.app import bash_app
 
 import logging
 
+from functools import partial
 
 logger = logging.getLogger("parsl.appworkflow")
 
@@ -24,33 +25,52 @@ import configuration
 
 parsl.load(configuration.parsl_config)
 
-@bash_app(executors=['submit-node'])
-def generate_worklist(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str):
-    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
+# given a commandline, wrap it so that we'll invoke
+# shifter appropriately (so that we don't need to
+# hardcode shifter / singularity command lines all
+# over the place.
+def shifter_wrapper(img, cmd):
+  wrapped_cmd = "shifter --entrypoint --image={} {}".format(img, cmd)
+  return wrapped_cmd
 
 @bash_app(executors=['submit-node'])
-def generate_bundles(singularity_img_path: str, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
+def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
+    base = "/global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    c = wrap(base)
+    logger.debug("generate_worklist command is: {}".format(c))
+    return c
+#    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
+
+@bash_app(executors=['submit-node'])
+def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
+    c = wrap("/global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
+    logger.debug("generate_bundles command is: {}".format(c))
+    return c
+    # return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 
 @bash_app(executors=['submit-node'])
 def cache_singularity_image(local_file, url):
     return "singularity build {} {}".format(local_file, url)
 
+@bash_app(executors=['submit-node'])
+def cache_shifter_image(image_tag):
+    return "shifterimg -v pull {}".format(image_tag)
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity_fake(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
+def run_imsim_in_singularity_fake(wrap, nthreads: int, work_and_out_base: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
     return "echo start a bash task; sleep 20s ; echo this is stdout ; (echo this is stderr >&2 ) ; false"
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_img_path: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
+def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
 
     import os
     import re
 
     prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; ulimit -Sv 120000000 ; "
 
-    debugger_cmd = " (while true; do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 3m ; done ) & "
+    # debugger_cmd = " (while true; do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 3m ; done ) & "
+    debugger_cmd = "echo starting with no debug loop ;"
 
     postfix_cmd = " echo waiting ; wait ; echo done waiting "
 
@@ -72,8 +92,10 @@ def run_imsim_in_singularity(nthreads: int, work_and_out_base: str, singularity_
       # filename in phosim_txt_fn will look like: phosim_cat_1909355.txt
       # extract the numeric part of that
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
-
-      body_cmd += "singularity run -B {},{},/projects/LSSTADSP_DESC {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
+#
+#--image=avillarreal/alcf_run2.0i /global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-bundle.py
+      body_cmd += wrap("/home/lsst/DC2/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index))
+      # body_cmd += "singularity run -B {},{},/projects/LSSTADSP_DESC {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
 
     whole_cmd = prefix_cmd + debugger_cmd + body_cmd + postfix_cmd
@@ -98,7 +120,7 @@ def trickle_submit(bundle_lists, task_info):
   ot = workdir + "task-stdout.txt"
   er = workdir + "task-stderr.txt"
 
-  future = run_imsim(64, configuration.work_and_out_path, configuration.singularity_img, configuration.inst_cat_root, bundle_lists, nodename, catalogs, stdout=ot, stderr=er)
+  future = run_imsim(container_wrapper, 64, configuration.work_and_out_path, configuration.inst_cat_root, bundle_lists, nodename, catalogs, stdout=ot, stderr=er)
   logger.info("launched a run for bundle nodename {}".format(nodename))
 
   return future
@@ -109,27 +131,32 @@ def trickle_submit(bundle_lists, task_info):
 #instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(configuration.inst_cat_root))
 #logger.info("there are {} instance catalogs to process".format(len(instance_catalogs)))
 
-logger.info("caching singularity image")
+container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+
+logger.info("caching container image")
 
 if (not configuration.fake) and configuration.singularity_download:
-  singularity_future = cache_singularity_image(configuration.singularity_img, configuration.singularity_url)
-
-  singularity_future.result()
+  if configuration.MACHINEMODE == "theta":
+    singularity_future = cache_singularity_image(configuration.singularity_img, configuration.singularity_url)
+    singularity_future.result()
+  elif configuration.MACHINEMODE == "cori":
+    shifter_future = cache_shifter_image(configuration.singularity_img)
+    shifter_future.result()
 
 if configuration.worklist_generate:
   logger.info("generating worklist")
-  worklist_future = generate_worklist(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists)
+  worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
   worklist_future.result()
 
 logger.info("generating bundles")
 
 pathlib.Path(configuration.bundler_restart_path).mkdir(parents=True, exist_ok=True) 
 
-bundle_future = generate_bundles(configuration.singularity_img, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists, configuration.bundler_restart_path)
+bundle_future = generate_bundles(container_wrapper, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists, configuration.bundler_restart_path)
 
 bundle_future.result()
 
-logger.info("loading bundles")
+logger.info("Loading bundles from {}".format(configuration.bundle_lists))
 
 with open(configuration.bundle_lists) as fp:
   bundles = json.load(fp)

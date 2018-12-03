@@ -1,42 +1,58 @@
-from libsubmit.providers import CobaltProvider
-from libsubmit.launchers import SimpleLauncher
-
 from parsl.config import Config
-from parsl.executors.mpix import MPIExecutor
+
+from parsl.addresses import *
+
+# for theta
+#from parsl.executors.mpix import MPIExecutor
+from parsl.providers import CobaltProvider
+from parsl.launchers import SimpleLauncher
 from parsl.executors.threads import ThreadPoolExecutor
+
+# for cori htc
+from parsl.providers import SlurmProvider
+from parsl.launchers import SrunLauncher
+from parsl.executors import HighThroughputExecutor
+
+# some configuration varies based on machine, and this
+# will swtich.
+# choose either "core" or "theta"
+MACHINEMODE="cori"
 
  # this should scale up to 802 in real life, or up to 8 or 16 in debug queue
  # note at present, 1 is required to run the rank 0 controller, not any app tasks
  # so the minimum value to make progress is 2
 
-#THETA_NODES=128
+#COMPUTE_NODES=128
 #THETA_QUEUE="default"
 #WALLTIME="02:58:30"
 
-#THETA_NODES=2048
+#COMPUTE_NODES=2048
 #THETA_QUEUE="R.LSSTADSP_DESC"
 #WALLTIME="16:30:00"
 
-#THETA_NODES=8
+#COMPUTE_NODES=8
 #THETA_QUEUE="debug-flat-quad"
 #WALLTIME="00:58:00"
 
-#THETA_NODES=256
+#COMPUTE_NODES=256
 #THETA_QUEUE="default"
 #WALLTIME="05:50:00"
 
-THETA_NODES=2048
+COMPUTE_NODES=1
 THETA_QUEUE="R.LSSTADSP_DESC"
-WALLTIME="47:28:00"
+CORI_QUEUE="regular" # or debug
+WALLTIME="23:00:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
 
 # /-terminated path to work and output base dir
-work_and_out_path = "/projects/LSSTADSP_DESC/benc/"
+work_and_out_path = "/global/cscratch1/sd/bxc/run201811/workpath/"
 
 # singularity image containing the ALCF_1.2i distro
-singularity_img = work_and_out_path + "ALCF_1.2.simg"
+singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
+# singularity_img = "avillarreal/alcf_run2.0i" -- cori/shifter
+# singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
 singularity_url = "shub://LSSTDESC/ALCF_1.2i:latest"
@@ -49,13 +65,16 @@ singularity_download = True
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
-worklist_generate = False
+#worklist_generate = True
+worklist_generate = True
 
 # set to true to use fake short sleep instead of singularity
 fake = False
 
 
-inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_180917/"
+inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/Run2.1i/instCat"
+# inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
+# inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/benc/2.0i_sample/inputs/"
@@ -64,9 +83,9 @@ inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_180917/"
 # trickle-loop parameters
 # submit 10% more jobs than we have nodes for so that there are
 # at least some waiting to run
-max_simultaneous_submit = THETA_NODES * 1.1
+max_simultaneous_submit = COMPUTE_NODES * 2.1
 
-rebalance_seconds = 3 * 60
+rebalance_seconds = 60 * 60
 #rebalance_seconds = 4 * 60 * 60
 
 trickle_loop_seconds = 60
@@ -109,7 +128,12 @@ ulimit -Sv 120000000
 export SINGULARITY_HOME=/home/antoniov                                                                                                                                                                                                                     
 export OMP_NUM_THREADS=1"""
 
-mpi_executor = MPIExecutor(
+"""
+Commented out because MPIExecutor does not exist
+in the version of parsl we're going to use for
+this run -- it's been replaced by HighThoughputExector
+and ExtremeScaleExecutor.
+theta_executor = MPIExecutor(
             label="worker-nodes",
             jobs_q_url=JOB_URL,
             results_q_url=RESULT_URL,
@@ -118,7 +142,7 @@ mpi_executor = MPIExecutor(
                 queue=THETA_QUEUE,
                 launcher=SimpleLauncher(),
                 walltime=WALLTIME,
-                nodes_per_block=THETA_NODES,
+                nodes_per_block=COMPUTE_NODES,
                 tasks_per_node=1,
                 init_blocks=1,
                 max_blocks=1,
@@ -127,10 +151,37 @@ mpi_executor = MPIExecutor(
                 cmd_timeout=60
             ),
         )
+"""
+
+cori_executor = HighThroughputExecutor(
+            label='worker-nodes',
+            address=address_by_hostname(),
+            worker_debug=True,
+            cores_per_worker = 272,
+            provider=SlurmProvider(
+                CORI_QUEUE,
+                nodes_per_block=COMPUTE_NODES,
+                # tasks_per_node=1,
+                exclusive = True,
+                init_blocks=1,
+                min_blocks=1,
+                max_blocks=2,
+                scheduler_options="""#SBATCH --constraint=knl""",
+                launcher=SrunLauncher(),
+                cmd_timeout=60,
+                walltime=WALLTIME
+            ),
+        )
 
 local_executor = ThreadPoolExecutor(max_threads=2, label="submit-node")
 
-parsl_config = Config(
-    executors=[ mpi_executor, local_executor ],
-    strategy=None,
-)
+if MACHINEMODE == "cori":
+  parsl_config = Config(
+      executors=[ cori_executor, local_executor ],
+      run_dir="{}/runinfo/".format(work_and_out_path)
+    )
+elif MACHINEMODE == "theta":
+  parsl_config = Config(
+      executors=[ theta_executor, local_executor ],
+      strategy=None
+    )
