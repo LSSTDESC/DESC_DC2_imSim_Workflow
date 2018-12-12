@@ -24,7 +24,7 @@ with open(worklist) as fp:
     worklist_a = json.load(fp)
 
 # we now define key characteristics of the imSim version + architecture.
-mem_per_thread = 2      # the amount of memory a given sensor thread is expected to max out at
+mem_per_thread = 3      # the amount of memory a given sensor thread is expected to max out at
 mem_per_instance = 10   # the amount of shared memory an imSim container is expected to have
 
 mem_per_node = 96-5     # the available memory on a compute node to target for use, minus some leeway
@@ -44,7 +44,7 @@ jbu.check_job_success(bundles, outpath, restartpath)
 print("parsl-bundle: restart path is: {}".format(restartpath))
 
 print("parsl-bundle: Determining remaining jobs...")
-worklist_new = jbu.determine_remaining_jobs("/global/homes/b/bxc/run201811/ALCF_1.2i/empty-worklist.json", restartpath)
+worklist_new = jbu.determine_remaining_jobs("/global/homes/a/asv13/ALCF_1.2i/empty-worklist.json", restartpath)
 
 print("parsl-bundle: worklist_new has length {}".format(len(worklist_new)))
 if len(worklist_new) > 0:

@@ -38,20 +38,20 @@ MACHINEMODE="cori"
 #THETA_QUEUE="default"
 #WALLTIME="05:50:00"
 
-COMPUTE_NODES=1
+COMPUTE_NODES=4
 THETA_QUEUE="R.LSSTADSP_DESC"
 CORI_QUEUE="regular" # or debug
-WALLTIME="23:00:00"
+WALLTIME="18:00:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
 
 # /-terminated path to work and output base dir
-work_and_out_path = "/global/cscratch1/sd/bxc/run201811/workpath/"
+work_and_out_path = "/global/cscratch1/sd/asv13/run201812/workpath/"
 
 # singularity image containing the ALCF_1.2i distro
-singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-# singularity_img = "avillarreal/alcf_run2.0i" -- cori/shifter
+#singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
+singularity_img = "avillarreal/alcf_run2.0i:pretesting" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
@@ -60,19 +60,18 @@ singularity_url = "shub://LSSTDESC/ALCF_1.2i:latest"
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
 # probably should be set to True unless testing
-# interactively
+# interactively:
 singularity_download = True
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
 #worklist_generate = True
-worklist_generate = True
+worklist_generate = False
 
 # set to true to use fake short sleep instead of singularity
 fake = False
 
-
-inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/Run2.1i/instCat"
+inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/cosmoDC2_v1.1.4/instCat/*/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
@@ -83,7 +82,7 @@ inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/Run2.1i/instCat"
 # trickle-loop parameters
 # submit 10% more jobs than we have nodes for so that there are
 # at least some waiting to run
-max_simultaneous_submit = COMPUTE_NODES * 2.1
+max_simultaneous_submit = COMPUTE_NODES * 1.1
 
 rebalance_seconds = 60 * 60
 #rebalance_seconds = 4 * 60 * 60
@@ -165,8 +164,8 @@ cori_executor = HighThroughputExecutor(
                 exclusive = True,
                 init_blocks=1,
                 min_blocks=1,
-                max_blocks=2,
-                scheduler_options="""#SBATCH --constraint=knl""",
+                max_blocks=1,
+                scheduler_options="""#SBATCH --constraint=knl --no-kill""",
                 launcher=SrunLauncher(),
                 cmd_timeout=60,
                 walltime=WALLTIME
