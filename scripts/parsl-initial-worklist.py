@@ -32,7 +32,7 @@ bundles = sys.argv[3]
 # currently chosen to simulate up through Year 3.
 yearlimit = 743027
 
-globstr = '{}/*/0*/phosim_cat*.txt'.format(inst_cat_root)
+globstr = '{}/batch*/0*/phosim_cat*.txt'.format(inst_cat_root)
 print("parsl-initial-bundle: globbing {}".format(globstr))
 instcat_list_temp = glob.glob(globstr)
 instcat_list_a = [instcat for instcat in instcat_list_temp if int((instcat.split('_')[-1]).split('.')[0]) <= yearlimit]

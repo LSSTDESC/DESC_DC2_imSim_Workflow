@@ -44,7 +44,7 @@ jbu.check_job_success(bundles, outpath, restartpath)
 print("parsl-bundle: restart path is: {}".format(restartpath))
 
 print("parsl-bundle: Determining remaining jobs...")
-worklist_new = jbu.determine_remaining_jobs("/global/homes/a/asv13/ALCF_1.2i/empty-worklist.json", restartpath)
+worklist_new = jbu.determine_remaining_jobs("/global/homes/d/descim/ALCF_1.2i/empty-worklist.json", restartpath)
 
 print("parsl-bundle: worklist_new has length {}".format(len(worklist_new)))
 if len(worklist_new) > 0:
