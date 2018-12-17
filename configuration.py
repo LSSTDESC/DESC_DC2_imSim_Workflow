@@ -50,6 +50,7 @@ ACCOUNT="LSSTADSP_DESC"
 
 # /-terminated path to work and output base dir
 work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.0i/Run2.1i/run201812/workpath/"
+#work_and_out_path = "/global/cscratch1/sd/descim/test/workpath/"
 
 # singularity image containing the ALCF_1.2i distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
@@ -157,10 +158,12 @@ theta_executor = MPIExecutor(
 cori_in_salloc_executor = HighThroughputExecutor(
             label='worker-nodes',
             address=address_by_hostname(),
-            worker_debug=True,
+            worker_debug=False,
             cores_per_worker = 272,
+            heartbeat_period = 300,
+            heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block=1999,
+                nodes_per_block = 1023,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,
@@ -175,6 +178,8 @@ cori_queue_executor = HighThroughputExecutor(
             address=address_by_hostname(),
             worker_debug=True,
             cores_per_worker = 272,
+            heartbeat_period = 300,
+            heartbeat_threshold = 1200,
             provider=SlurmProvider(
                 CORI_QUEUE,
                 nodes_per_block=COMPUTE_NODES,
