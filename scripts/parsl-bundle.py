@@ -25,7 +25,7 @@ with open(worklist) as fp:
 
 # we now define key characteristics of the imSim version + architecture.
 mem_per_thread = 3      # the amount of memory a given sensor thread is expected to max out at
-mem_per_instance = 10   # the amount of shared memory an imSim container is expected to have
+mem_per_instance = 20   # the amount of shared memory an imSim container is expected to have
 
 mem_per_node = 96-5     # the available memory on a compute node to target for use, minus some leeway
 threads_per_node = 68*4 # the number of available threads to be used on a given node

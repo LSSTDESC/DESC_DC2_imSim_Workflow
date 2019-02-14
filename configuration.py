@@ -49,7 +49,7 @@ ACCOUNT="LSSTADSP_DESC"
 
 
 # /-terminated path to work and output base dir
-work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.0i/Run2.1i/run201812/workpath/"
+work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201812/"
 #work_and_out_path = "/global/cscratch1/sd/descim/test/workpath/"
 
 # singularity image containing the ALCF_1.2i distro
@@ -74,7 +74,7 @@ worklist_generate = False
 # set to true to use fake short sleep instead of singularity
 fake = False
 
-inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/cosmoDC2_v1.1.4/instCat/"
+inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1i/instCat/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
 # inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
@@ -158,12 +158,13 @@ theta_executor = MPIExecutor(
 cori_in_salloc_executor = HighThroughputExecutor(
             label='worker-nodes',
             address=address_by_hostname(),
-            worker_debug=False,
+            worker_debug=True,
+            suppress_failure=True,
             cores_per_worker = 272,
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 1023,
+                nodes_per_block = 64,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,

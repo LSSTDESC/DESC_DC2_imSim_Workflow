@@ -211,7 +211,7 @@ def check_job_success(infile, outpath, restartpath):
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
             print("Checking for completed work: node {}, visit {}".format(node, visit))
-            searchstring = str('/'.join(visit.split('/')[-4:-2])+'/')
+            searchstring = str('/'.join(visit.split('/')[-3:-1])+'/')
             pat = outpath+searchstring+'*'
             files = glob.glob(pat)
             print("Checking for completed work: node {}, visit {}: glob {} found {} names".format(node, visit, pat, len(files)))
@@ -234,6 +234,24 @@ def check_job_success(infile, outpath, restartpath):
                     # sqlite objects made for the sensors.
                     pass
         print("check_job_success: after check, node {}, input_data[node] = {}".format(node, input_data[node]))
+
+    emptynode_list = []
+    for node in input_data.keys():
+        indexint = 0
+        emptyvisit_list = []
+        for visit, sensors, numobjs in input_data[node]:
+            sensors = [sens for sens in sensors if sens != []]
+            numobjs = [nums for nums in numobjs if nums != []]
+            if len(sensors) == 0: emptyvisit_list.append(indexint)
+            (input_data[node][indexint])[1] = sensors
+            (input_data[node][indexint])[2] = numobjs
+            indexint += 1
+        if emptyvisit_list:
+           for index in sorted(emptyvisit_list, reverse=True):
+               del input_data[node][index]
+        if not input_data[node]: emptynode_list.append(node)
+    for node in emptynode_list:
+        del input_data[node]
 
     outfilename = (infile.split('/')[-1]).split('.')[0]
     fn = restartpath+outfilename+'_restart.json'
