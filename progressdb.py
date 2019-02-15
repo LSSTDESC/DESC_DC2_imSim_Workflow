@@ -1,21 +1,27 @@
+import logging
 import sqlite3
+import parsl
+
+logger = logging.getLogger(__name__)
 
 class ProgressDB:
     def __init__(self):
-        print("fake progress db init")
+        logger.info("progress db init")
 
     def put_visit(self, catalog_name: str):
-        print("fake put visit: {}".format(catalog_name))
+        logger.info("put visit: {}".format(catalog_name))
 
     def put_sensor_visit(self, catalog_name: str, sensor_number: int, complete: bool, pathname: str):
-        print("fake put sensor visit: {} {}".format(catalog_name, sensor_number))
+        logger.info("put sensor visit: {} {}".format(catalog_name, sensor_number))
 
     def update_visit_status(self, catalog_name: str):
-        print("fake update visit status for visit {}".format(catalog_name))
+        logger.info("update visit status for visit {}".format(catalog_name))
 
 if __name__ == '__main__':
 
-    print("DB test")
+    parsl.set_stream_logger(name = __name__)
+
+    logger.info("progressdb: start")
     db = ProgressDB()
 
     # before you can put visit sensor info, you have to put the visit.
@@ -37,3 +43,5 @@ if __name__ == '__main__':
     # reported all of the sensor_visits (especially the incomplete ones)
     # otherwise the DB might think the visit is complete when it is not.
     db.update_visit_status("abc-1111")
+
+    logger.info("progressdb test: end")
