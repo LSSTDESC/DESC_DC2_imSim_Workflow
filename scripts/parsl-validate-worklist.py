@@ -4,6 +4,7 @@ import glob
 import json
 import sys
 import os
+import subprocess
 
 runtime_root = sys.argv[1] # location of instance catalogs for runtime usage.
 
@@ -21,7 +22,7 @@ newworklistpath = sys.argv[3] # a list of visits and sensors that will be output
 with open(worklistpath) as fp: oldworklist = json.load(fp)
 
 longterm_instcats = [item[0] for item in oldworklist]
-longterm_root = os.path.commonpaths(longterm_instcats)
+longterm_root = os.path.commonprefix(longterm_instcats)
 
 runtime_instcats = [os.path.join(runtime_root, '/'.join(instcat.split('/')[-3:])) for instcat in longterm_instcats]
 
@@ -30,12 +31,15 @@ numobjs = [item[2] for item in oldworklist]
 
 # So now we have both old and new directory structures. We now want to check that files exist and copy over those that
 # do not. The best way to do this is probably with an rsync command between each directory pair. For now, prototype
-# the comparison.
+# the comparison. We might as well make the new worklist at the same time at the same time.
+new_worklist = [ [runtime_instcats[i], sensors[i], numobjs[i]] for i in range(len(runtime_instcats))]
+with open(newworklistpath, 'w') as fp: json.dump(new_worklist, fp)
 
 for longterm_instcat, runtime_instcat in zip(longterm_instcats, runtime_instcats):
-    print('longterm: ', longterm_instcat)
-    print('runtime: ', runtime_instcat)
-
-
+    first_path = longterm_instcat.split('phosim')[0]
+    second_path = runtime_instcat.split('phosim')[0]
+    print('first: ', first_path)
+    print('second: ', second_path)
+    #subprocess.call(["rsync", "-avzh", "--ignore-existing", first_path, second_path])
 
 sys.exit(0)
