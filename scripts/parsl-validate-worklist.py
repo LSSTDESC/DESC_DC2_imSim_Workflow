@@ -38,15 +38,15 @@ new_instcats=[]
 for longterm_instcat, runtime_instcat in zip(longterm_instcats, runtime_instcats):
     target_path = runtime_instcat+'/phosim*'
     phosim_file = glob.glob(target_path)
-    print(longterm_instcat, target_path, phosim_file)
     # if there is not a phosim_file, we're going to have to rsync and untar some files.
     if not phosim_file:
         updirectory=os.path.dirname(runtime_instcat)+'/'
-        subprocess.call(["rsync", "-avzh", "--ignore-existing", longterm_instcat, updirectory])
-        #subprocess.call(["stuff", "to", "untar"])
-        #subprocess.call(["stuff", "to", "remove", "tarball"])
+        tarpath=updirectory+longterm_instcat.split('/')[-1]
+        #subprocess.call(["rsync", "-avzh", "--ignore-existing", longterm_instcat, updirectory])
+        #subprocess.call(["tar", "-zvcf", tarpath, "-C", updirectory])
+        #subprocess.call(["rm", tarpath])
         phosim_file = glob.glob(target_path)
-    new_instcats.append(phosim_file)
+    new_instcats.append(str(phosim_file))
 
 # This creates a new worklist.
 new_worklist = [ [new_instcats[i], sensors[i], numobjs[i]] for i in range(len(runtime_instcats))]
