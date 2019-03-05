@@ -16,30 +16,40 @@ newworklistpath = sys.argv[3] # a list of visits and sensors that will be output
 # 1. Read in the existing worklist.
 # 2. Convert from the longterm_root directory to the runtime_root directory structure.
 # 3. Check that all required instance catalogs exist in the runtime_root directory structure.
-# 4. If the required instance catalog does NOT exist, copy it over.
-# 5. Output a new worklist which is utilizing the runtime_root directory structure for analysis.
+# 4. If the required instance catalog does NOT exist, copy over the corresponding tarball.
+# 5. Untar the tarball. 
+# 6. Output a new worklist which is utilizing the runtime_root directory structure for analysis.
 
 with open(worklistpath) as fp: oldworklist = json.load(fp)
 
-longterm_instcats = [item[0] for item in oldworklist]
-longterm_root = os.path.commonprefix(longterm_instcats)
+longterm_instcats = [item[0] for item in oldworklist]		# This is a list of the appropriate tarballs to move.
+longterm_root = os.path.commonprefix(longterm_instcats)[:-2]	# This is the common directory structure across them.
+# the dumb -2 here is to try to avoid losing the 00.
 
-runtime_instcats = [os.path.join(runtime_root, '/'.join(instcat.split('/')[-3:])) for instcat in longterm_instcats]
+# This generates the paths to the expected directory to find files.
+runtime_instcats = [runtime_root+instcat.split(longterm_root)[-1].split('.tar.gz')[0] for instcat in longterm_instcats]
 
+# This stores these additional bits of information for generating a new worklist.
 sensors = [item[1] for item in oldworklist]
 numobjs = [item[2] for item in oldworklist]
 
-# So now we have both old and new directory structures. We now want to check that files exist and copy over those that
-# do not. The best way to do this is probably with an rsync command between each directory pair. For now, prototype
-# the comparison. We might as well make the new worklist at the same time at the same time.
-new_worklist = [ [runtime_instcats[i], sensors[i], numobjs[i]] for i in range(len(runtime_instcats))]
-with open(newworklistpath, 'w') as fp: json.dump(new_worklist, fp)
-
+new_instcats=[]
+# Now we need to walk the RUNTIME directories to attempt to see if they have the appropriate files.
 for longterm_instcat, runtime_instcat in zip(longterm_instcats, runtime_instcats):
-    first_path = longterm_instcat.split('phosim')[0]
-    second_path = runtime_instcat.split('phosim')[0]
-    print('first: ', first_path)
-    print('second: ', second_path)
-    #subprocess.call(["rsync", "-avzh", "--ignore-existing", first_path, second_path])
+    target_path = runtime_instcat+'/phosim*'
+    phosim_file = glob.glob(target_path)
+    print(longterm_instcat, target_path, phosim_file)
+    # if there is not a phosim_file, we're going to have to rsync and untar some files.
+    if not phosim_file:
+        updirectory=os.path.dirname(runtime_instcat)+'/'
+        subprocess.call(["rsync", "-avzh", "--ignore-existing", longterm_instcat, updirectory])
+        #subprocess.call(["stuff", "to", "untar"])
+        #subprocess.call(["stuff", "to", "remove", "tarball"])
+        phosim_file = glob.glob(target_path)
+    new_instcats.append(phosim_file)
+
+# This creates a new worklist.
+new_worklist = [ [new_instcats[i], sensors[i], numobjs[i]] for i in range(len(runtime_instcats))]
+with open(newworklistpath, 'w') as fp: json.dump(new_worklist, fp)
 
 sys.exit(0)
