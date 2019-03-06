@@ -34,10 +34,10 @@ def shifter_wrapper(img, cmd):
   return wrapped_cmd
 
 @bash_app(executors=['submit-node'])
-def validate_worklist(wrap, runtime_root: str, work_json: str, newwork_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-worklist.py {} {} {}".format(runtime_root, work_json, newwork_json)
+def validate_transfer(wrap, runtime_root: str, tarball_json: str):
+    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(runtime_root, tarball_json)
     c = wrap(base)
-    logger.debug("validate_worklist command is: {}".format(c))
+    logger.debug("validate_transfer command is: {}".format(c))
     return c   
 
 @bash_app(executors=['submit-node'])
