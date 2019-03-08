@@ -66,13 +66,18 @@ singularity_url = "shub://LSSTDESC/ALCF_1.2i:latest"
 # interactively:
 singularity_download = True
 
+# should we validate that the transfer was successful?
+validate_transfer = True
+
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
-#worklist_generate = True
-worklist_generate = False
+worklist_generate = True
+#worklist_generate = False
 
 # set to true to use fake short sleep instead of singularity
 fake = False
+
+tarball_list = "/path/to/tarball/list"
 
 inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1i/instCat/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"

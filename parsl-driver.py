@@ -34,8 +34,8 @@ def shifter_wrapper(img, cmd):
   return wrapped_cmd
 
 @bash_app(executors=['submit-node'])
-def validate_transfer(wrap, runtime_root: str, tarball_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(runtime_root, tarball_json)
+def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
+    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
     c = wrap(base)
     logger.debug("validate_transfer command is: {}".format(c))
     return c   
@@ -156,6 +156,11 @@ if (not configuration.fake) and configuration.singularity_download:
   elif configuration.MACHINEMODE == "cori":
     shifter_future = cache_shifter_image(configuration.singularity_img)
     shifter_future.result()
+
+if configuration.validate_transfer:
+  logger.info("validating transfer")
+  validate_future = validate_transfer(container_wrapper, configuration.inst_cat_root, configuration.tarball_list)
+  validate_future.result()
 
 if configuration.worklist_generate:
   logger.info("generating worklist")
