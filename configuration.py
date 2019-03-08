@@ -79,6 +79,8 @@ fake = False
 
 tarball_list = "/path/to/tarball/list"
 
+archive_base = "/path/to/archive/base"
+
 inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1i/instCat/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"

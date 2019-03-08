@@ -56,8 +56,8 @@ def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str
     # return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 @bash_app(executors=['submit-node'])
-def archive_completed(wrap, runtime_root: str, inst_cat_root: str, longterm_root: str):
-    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, inst_cat_root, longterm_root)
+def archive_completed(wrap, runtime_root: str, work_json: str, longterm_root: str):
+    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, work_json, longterm_root)
     logger.debug("archive_completed command is: {}".format(c))
     return c
 
@@ -220,8 +220,8 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
   logger.info("trickle loop: end iteration")
   time.sleep(configuration.trickle_loop_seconds)
 
-
-
+archive_future = archive_completed(container_wrapper, configuration.work_and_out_base+"run/outputs/", configuration.original_work_list, configuration.archive_base)
+archive_future.result()
 
 logger.info("end of parsl-driver")
 
