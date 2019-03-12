@@ -157,11 +157,6 @@ if (not configuration.fake) and configuration.singularity_download:
     shifter_future = cache_shifter_image(configuration.singularity_img)
     shifter_future.result()
 
-if configuration.validate_transfer:
-  logger.info("validating transfer")
-  validate_future = validate_transfer(container_wrapper, configuration.inst_cat_root, configuration.tarball_list)
-  validate_future.result()
-
 if configuration.worklist_generate:
   logger.info("generating worklist")
   worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)

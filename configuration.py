@@ -58,7 +58,7 @@ singularity_img = "avillarreal/alcf_run2.0i:production20181214" # -- cori/shifte
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
-singularity_url = "shub://LSSTDESC/ALCF_1.2i:latest"
+singularity_url = "docker://avillarreal/alcf_run2.0i:production20181214"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
@@ -71,15 +71,15 @@ validate_transfer = True
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
-worklist_generate = True
-#worklist_generate = False
+#worklist_generate = True
+worklist_generate = False
 
 # set to true to use fake short sleep instead of singularity
 fake = False
 
-tarball_list = "/path/to/tarball/list"
+tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201812/tarball_test.json"
 
-archive_base = "/path/to/archive/base"
+archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"
 
 inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1i/instCat/"
 # inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"

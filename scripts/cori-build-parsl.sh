@@ -8,10 +8,10 @@ export PATH=/global/homes/d/descim/miniconda3/bin:$PATH
 
 # delete old conda environment
 
-rm -rf ~/.conda/envs/parsl-imsim-nov2018
+rm -rf ~/.conda/envs/parsl-imsim-201903
 
-conda create -n parsl-imsim-nov2018 -y
-source activate parsl-imsim-nov2018
+conda create -n parsl-imsim-201903 -y
+source activate parsl-imsim-201903
 
 conda install mpi4py -y
 
