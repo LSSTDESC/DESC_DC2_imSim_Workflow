@@ -167,6 +167,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             address=address_by_hostname(),
             worker_debug=True,
             suppress_failure=True,
+            poll_period = 5000,   
             cores_per_worker = 272,
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
