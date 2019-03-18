@@ -57,7 +57,7 @@ def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str
 
 @bash_app(executors=['submit-node'])
 def archive_completed(wrap, runtime_root: str, work_json: str, longterm_root: str):
-    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, work_json, longterm_root)
+    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, work_json, longterm_root))
     logger.debug("archive_completed command is: {}".format(c))
     return c
 

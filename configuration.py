@@ -49,25 +49,25 @@ ACCOUNT="LSSTADSP_DESC"
 
 
 # /-terminated path to work and output base dir
-work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201812/"
+work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/"
 #work_and_out_path = "/global/cscratch1/sd/descim/test/workpath/"
 
 # singularity image containing the ALCF_1.2i distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-singularity_img = "avillarreal/alcf_run2.0i:production20181214" # -- cori/shifter
+singularity_img = "avillarreal/alcf_run2.0i:testing2.2" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
-singularity_url = "docker://avillarreal/alcf_run2.0i:production20181214"
+singularity_url = "docker://avillarreal/alcf_run2.0i:testing2.2"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
 # probably should be set to True unless testing
 # interactively:
-singularity_download = True
+singularity_download = False
 
 # should we validate that the transfer was successful?
-validate_transfer = True
+validate_transfer = False
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
@@ -77,7 +77,7 @@ worklist_generate = False
 # set to true to use fake short sleep instead of singularity
 fake = False
 
-tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201812/tarball_test.json"
+tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_0_1000_tarballs.json"
 
 archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"
 
@@ -171,7 +171,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 64,
+                nodes_per_block = 1999,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,
