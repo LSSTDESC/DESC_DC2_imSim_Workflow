@@ -1,7 +1,7 @@
 import os
 from parsl.config import Config
 
-from parsl.addresses import *
+from parsl.addresses import address_by_hostname
 
 # for theta
 #from parsl.executors.mpix import MPIExecutor
@@ -54,11 +54,11 @@ work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/"
 
 # singularity image containing the ALCF_1.2i distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-singularity_img = "avillarreal/alcf_run2.0i:testing2.2" # -- cori/shifter
+singularity_img = "avillarreal/alcf_run2.0i:production201903" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
-singularity_url = "docker://avillarreal/alcf_run2.0i:testing2.2"
+singularity_url = "docker://avillarreal/alcf_run2.0i:production201903"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
@@ -161,6 +161,7 @@ theta_executor = MPIExecutor(
             ),
         )
 """
+theta_executor =  None # just to avoid an error when testing
 
 cori_in_salloc_executor = HighThroughputExecutor(
             label='worker-nodes',

@@ -17,7 +17,7 @@ parsl.set_stream_logger()
 parsl.set_stream_logger(__name__)
 
 logger.info("No-op log message to test log configuration")
-
+logger.info("Parsl version is {}".format(parsl.__version__))
 # import configuration after setting parsl logging, because interesting
 # construction happens during the configuration
 
