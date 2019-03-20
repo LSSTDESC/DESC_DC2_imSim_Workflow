@@ -26,6 +26,16 @@ class ProgressDB:
         c.close()
         self.conn.commit()
 
+    def check_visit(self, catalog_name: str):
+        logger.info("check visit: {}".format(catalog_name))
+        c = self.conn.cursor()
+        c.execute("SELECT count(*) FROM visit WHERE catalog_name = ?", (catalog_name,))
+        test = (c.fetchone())[0]
+        if test == 0:
+            return False
+        else:
+            return True
+
     def put_visit(self, catalog_name: str):
         logger.info("put visit: {}".format(catalog_name))
         c = self.conn.cursor()
