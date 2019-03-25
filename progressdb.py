@@ -44,6 +44,18 @@ class ProgressDB:
         c.close()
         self.conn.commit()
 
+    ## this will safely add sensor_visits without risking overwriting a complete flag.
+    def init_sensor_visit(self, catalog_name: str,  sensor_number: int,
+                          complete: bool):
+        logger.info("init sensor visit: {} {}".format( catalog_name, sensor_number))
+        c = self.conn.cursor()
+        c.execute("INSERT OR IGNORE INTO sensor_visit "
+                  "(catalog_name, sensor_name, complete) "
+                  "VALUES (?,?,?)",
+                  [catalog_name, sensor_name, complete])
+        c.close()
+        self.conn.commit()   
+
     def put_sensor_visit(self, catalog_name: str, sensor_number: int,
                          complete: bool, pathname: str):
         logger.info("put sensor visit: {} {}".format(
