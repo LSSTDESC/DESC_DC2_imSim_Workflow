@@ -71,15 +71,14 @@ def cache_shifter_image(image_tag):
     return "shifterimg -v pull {}".format(image_tag)
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity_fake(wrap, nthreads: int, work_and_out_base: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
+def run_imsim_in_singularity_fake(wrap, nthreads: int, work_and_out_base: str, inst_cat_root: str, bundle_lists: str, nodeid: str, imsim_config: str, bundle, stdout=None, stderr=None):
     return "echo start a bash task; sleep 20s ; echo this is stdout ; (echo this is stderr >&2 ) ; false"
 
 @bash_app(executors=['worker-nodes'])
-def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_cat_root: str, bundle_lists: str, nodeid: str, bundle, stdout=None, stderr=None):
+def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_cat_root: str, bundle_lists: str, nodeid: str, imsim_config: str, bundle, stdout=None, stderr=None):
 
     import os
     import re
-
     prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; ulimit -Sv 120000000 ; "
 
     #debugger_cmd = " python /globalprocess_monitor.py arguments &; TASK_PID=$!; for (i in $(seq 1 120); do echo DEBUGLOOP; date; free-m; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu; echo END DEBUGLOOP; sleep 1m; if [$i -gt 119]; then kill $TASK_PID; fi; done ) &"
@@ -109,7 +108,7 @@ def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_c
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
 #
 #--image=avillarreal/alcf_run2.0i /global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-bundle.py
-      body_cmd += wrap("/DC2/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index))
+      body_cmd += wrap("/global/homes/d/descim/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} --config {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index, imsim_config))
       # body_cmd += "singularity run -B {},{},/projects/LSSTADSP_DESC {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
 
@@ -135,7 +134,7 @@ def trickle_submit(bundle_lists, task_info):
   ot = workdir + "task-stdout.txt"
   er = workdir + "task-stderr.txt"
 
-  future = run_imsim(container_wrapper, 64, configuration.work_and_out_path, configuration.inst_cat_root, bundle_lists, nodename, catalogs, stdout=ot, stderr=er)
+  future = run_imsim(container_wrapper, 64, configuration.work_and_out_path, configuration.inst_cat_root, bundle_lists, nodename, configuration.imsim_config, catalogs, stdout=ot, stderr=er)
   logger.info("launched a run for bundle nodename {}".format(nodename))
 
   return future

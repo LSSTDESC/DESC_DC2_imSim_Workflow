@@ -67,16 +67,17 @@ singularity_url = "docker://avillarreal/alcf_run2.0i:production201903"
 singularity_download = True
 
 # should we validate that the transfer was successful?
-validate_transfer = True
+validate_transfer = False
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
-worklist_generate = True
+worklist_generate = False
 
 # set to true to use fake short sleep instead of singularity
 fake = False
 
 tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_1000_2000_tarballs.json"
+imsim_config = "/global/homes/d/descim/ALCF_1.2i/parsl_imsim_configs"
 
 archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"
 
