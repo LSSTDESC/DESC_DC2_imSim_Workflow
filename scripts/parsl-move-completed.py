@@ -27,7 +27,7 @@ output_paths = [os.path.join(runtime_root,'/'.join(input_instcat.split('/')[-3:-
 longterm_paths = [os.path.join(longterm_root, '/'.join(input_instcat.split('/')[-3:-1]))+'/' for input_instcat in input_instcats]
 
 # Now - determine the actual outputs.
-types_to_grab = ('*.fits', '*.txt.gz')
+types_to_grab = ('*.fits', '*.txt.gz', '*.ckpt')
 
 for output_path, longterm_path in zip(output_paths, longterm_paths):
     files_grabbed = []
@@ -35,10 +35,11 @@ for output_path, longterm_path in zip(output_paths, longterm_paths):
         files_grabbed.extend(glob.glob(output_path+grabext))
     # and with the outputs determined, we now want to transfer them to long-term storage.
     # first we need to create the directory if it does not exist already.
-    if not os.path.exists(longterm_path):
-        os.makedirs(longterm_path)
-    for file_grabbed in files_grabbed:
-        subprocess.call(["rsync", "-azh", "--ignore-existing", file_grabbed, longterm_path]) 
+    if not any('.ckpt' in file_grabbed for file_grabbed in files_grabbed):
+        if not os.path.exists(longterm_path):
+            os.makedirs(longterm_path)
+        for file_grabbed in files_grabbed:
+            subprocess.call(["rsync", "-azh", "--ignore-existing", file_grabbed, longterm_path]) 
 
 print("parsl-move-completed: finished")
 sys.exit(0)
