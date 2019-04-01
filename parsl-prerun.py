@@ -49,12 +49,6 @@ def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str
     return c
 #    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
-@bash_app(executors=['submit-node'])
-def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
-    logger.debug("generate_bundles command is: {}".format(c))
-    return c
-    # return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 @bash_app(executors=['submit-node'])
 def cache_singularity_image(local_file, url):
@@ -88,21 +82,3 @@ if configuration.worklist_generate:
   logger.info("generating worklist")
   worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
   worklist_future.result()
-
-logger.info("generating bundles")
-
-pathlib.Path(configuration.bundler_restart_path).mkdir(parents=True, exist_ok=True) 
-
-# then make some bundles. This can all work on the log-in node.
-bundle_future = generate_bundles(container_wrapper, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists, configuration.bundler_restart_path)
-
-bundle_future.result()
-
-logger.info("Loading bundles from {}".format(configuration.bundle_lists))
-
-with open(configuration.bundle_lists) as fp:
-  bundles = json.load(fp)
-logger.info("Created {} bundles".format(len(bundles)))
-
-logger.info("end of parsl-prerun")
-
