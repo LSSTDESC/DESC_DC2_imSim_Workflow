@@ -10,6 +10,7 @@ export PATH=/global/homes/d/descim/miniconda3/bin:$PATH
 
 rm -rf ~/.conda/envs/parsl-imsim-201903
 
+conda remove --name parsl-imsim-201903 --all
 conda create -n parsl-imsim-201903 -y
 source activate parsl-imsim-201903
 
