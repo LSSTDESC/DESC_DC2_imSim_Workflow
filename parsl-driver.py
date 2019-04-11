@@ -1,4 +1,4 @@
-
+import collections
 import glob
 import time
 import pathlib
@@ -34,8 +34,15 @@ def shifter_wrapper(img, cmd):
   return wrapped_cmd
 
 @bash_app(executors=['submit-node'])
+def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
+    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
+    c = wrap(base)
+    logger.debug("validate_transfer command is: {}".format(c))
+    return c   
+
+@bash_app(executors=['submit-node'])
 def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
-    base = "/global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
     c = wrap(base)
     logger.debug("generate_worklist command is: {}".format(c))
     return c
@@ -43,11 +50,16 @@ def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str
 
 @bash_app(executors=['submit-node'])
 def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    c = wrap("/global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
+    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
     logger.debug("generate_bundles command is: {}".format(c))
     return c
     # return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
+@bash_app(executors=['submit-node'])
+def archive_completed(wrap, runtime_root: str, work_json: str, longterm_root: str):
+    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, work_json, longterm_root))
+    logger.debug("archive_completed command is: {}".format(c))
+    return c
 
 @bash_app(executors=['submit-node'])
 def cache_singularity_image(local_file, url):
@@ -69,8 +81,10 @@ def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_c
 
     prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; ulimit -Sv 120000000 ; "
 
-    # debugger_cmd = " (while true; do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 3m ; done ) & "
-    debugger_cmd = "echo starting with no debug loop ;"
+    #debugger_cmd = " python /globalprocess_monitor.py arguments &; TASK_PID=$!; for (i in $(seq 1 120); do echo DEBUGLOOP; date; free-m; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu; echo END DEBUGLOOP; sleep 1m; if [$i -gt 119]; then kill $TASK_PID; fi; done ) &"
+    debugger_cmd = " (for i in $(seq 1 300); do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 1m ; done ) & "
+    # debugger_cmd = "echo starting with no debug loop ;"
+    # debugger_cmd = " (for i in $(seq 1 120); do echo DEBUGLOOPJIM; ps auxww | grep python | grep -v grep; echo END DEBUGLOOPJIM ; sleep 1m; done ) & "
 
     postfix_cmd = " echo waiting ; wait ; echo done waiting "
 
@@ -94,7 +108,7 @@ def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_c
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
 #
 #--image=avillarreal/alcf_run2.0i /global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-bundle.py
-      body_cmd += wrap("/home/lsst/DC2/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index))
+      body_cmd += wrap("/DC2/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index))
       # body_cmd += "singularity run -B {},{},/projects/LSSTADSP_DESC {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
 
@@ -172,7 +186,7 @@ else:
 logger.info("Starting up trickle-in loop")
 
 
-todo_tasks = bundles
+todo_tasks = collections.OrderedDict(bundles)
 submitted_futures = []
 last_rebalance = time.time()
 
@@ -193,7 +207,7 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
 
   while len(submitted_futures) < configuration.max_simultaneous_submit and len(todo_tasks) > 0:
     logger.info("There is capacity for a new task")
-    task_info = todo_tasks.popitem()
+    task_info = todo_tasks.popitem(last=False)
     logger.info("popped task_info is: {}".format(task_info))
     f = trickle_submit(configuration.bundle_lists, task_info)
     submitted_futures.append(f)
@@ -201,8 +215,8 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
   logger.info("trickle loop: end iteration")
   time.sleep(configuration.trickle_loop_seconds)
 
-
-
+archive_future = archive_completed(container_wrapper, configuration.work_and_out_base+"run/outputs/", configuration.original_work_list, configuration.archive_base)
+archive_future.result()
 
 logger.info("end of parsl-driver")
 

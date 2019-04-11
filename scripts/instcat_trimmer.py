@@ -15,7 +15,7 @@ def determine_instcat_work(instcat_list, outfile):
     """
     db = ProgressDB() # connect to the database in order to start storing information about work.
     run20_region = trim_sensors.Run20Region()
-    instcat_list = [os.path.abspath(instcat_file) for instcat_file in instcat_list]
+    #instcat_list = [os.path.abspath(instcat_file) for instcat_file in instcat_list]
     sensors_list = [run20_region.trim_sensors(instcat) for instcat in instcat_list]
     work_data = [ [instcat, sensors] for (instcat, sensors) in zip(instcat_list, sensors_list)]
     for work in work_data:
