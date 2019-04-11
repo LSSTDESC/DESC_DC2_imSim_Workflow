@@ -64,7 +64,7 @@ singularity_url = "docker://avillarreal/alcf_run2.0i:production201903"
 # use the local copy from (eg) a previous run
 # probably should be set to True unless testing
 # interactively:
-singularity_download = True
+singularity_download = False
 
 # should we validate that the transfer was successful?
 validate_transfer = False
@@ -76,7 +76,7 @@ worklist_generate = False
 # set to true to use fake short sleep instead of singularity
 fake = False
 
-tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_1000_2000_tarballs.json"
+tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_tarballs.json"
 imsim_config = "/global/homes/d/descim/ALCF_1.2i/parsl_imsim_configs"
 
 archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"

@@ -12,7 +12,7 @@ echo TEST: inside sbatch script
 echo TEST: submit hostname: $(hostname)
 
 cd /global/u2/d/descim 
-source load_parsl_env.sh
+source /global/u2/d/descim/load_parsl_env.sh
 
 echo TEST: submitting driver: which python: $(which python)
 srun -N 1 python /global/homes/d/descim/ALCF_1.2i/parsl-driver.py
