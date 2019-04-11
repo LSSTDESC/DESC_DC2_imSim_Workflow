@@ -14,70 +14,70 @@ class ProgressDB:
         c = self.conn.cursor()
         c.execute(
             "CREATE TABLE IF NOT EXISTS visit "
-            "(catalog_name TEXT NOT NULL PRIMARY KEY, "
+            "(visit_id INTEGER NOT NULL PRIMARY KEY, "
             "complete BOOLEAN NOT NULL)")
         c.execute(
             "CREATE TABLE IF NOT EXISTS sensor_visit "
-            "(catalog_name TEXT NOT NULL, "
-            "sensor_number INTEGER NOT NULL, "
+            "(visit_id INTEGER NOT NULL, "
+            "sensor_name TEXT NOT NULL, "
             "complete BOOLEAN NOT NULL, "
             "path TEXT, "
-            "PRIMARY KEY (catalog_name, sensor_number))")
+            "PRIMARY KEY (visit_id, sensor_nanme))")
         c.close()
         self.conn.commit()
 
-    def check_visit(self, catalog_name: str):
-        logger.info("check visit: {}".format(catalog_name))
+    def check_visit(self, visit_id: int):
+        logger.info("check visit: {}".format(visit_id))
         c = self.conn.cursor()
-        c.execute("SELECT count(*) FROM visit WHERE catalog_name = ?", (catalog_name,))
+        c.execute("SELECT count(*) FROM visit WHERE visit_id = ?", (visit_id,))
         test = (c.fetchone())[0]
         if test == 0:
             return False
         else:
             return True
 
-    def put_visit(self, catalog_name: str):
-        logger.info("put visit: {}".format(catalog_name))
+    def put_visit(self, visit_id: int):
+        logger.info("put visit: {}".format(visit_id))
         c = self.conn.cursor()
-        c.execute("INSERT OR IGNORE INTO visit (catalog_name, complete) "
-                  "VALUES(?, 'false')", [catalog_name])
+        c.execute("INSERT OR IGNORE INTO visit (visit_id, complete) "
+                  "VALUES(?, 'false')", [visit_id])
         c.close()
         self.conn.commit()
 
     ## this will safely add sensor_visits without risking overwriting a complete flag.
-    def init_sensor_visit(self, catalog_name: str,  sensor_number: int,
+    def init_sensor_visit(self, visit_id: int,  sensor_name: str,
                           complete: bool):
-        logger.info("init sensor visit: {} {}".format( catalog_name, sensor_number))
+        logger.info("init sensor visit: {} {}".format( visit_id, sensor_name))
         c = self.conn.cursor()
         c.execute("INSERT OR IGNORE INTO sensor_visit "
-                  "(catalog_name, sensor_name, complete) "
+                  "(visit_id, sensor_name, complete) "
                   "VALUES (?,?,?)",
-                  [catalog_name, sensor_name, complete])
+                  [visit_id, sensor_name, complete])
         c.close()
         self.conn.commit()   
 
-    def put_sensor_visit(self, catalog_name: str, sensor_number: int,
+    def put_sensor_visit(self, visit_id: int, sensor_name: str,
                          complete: bool, pathname: str):
         logger.info("put sensor visit: {} {}".format(
-                                                catalog_name, sensor_number))
+                                                visit_id, sensor_name))
 
         c = self.conn.cursor()
         c.execute("INSERT OR REPLACE INTO sensor_visit "
-                  "(catalog_name, sensor_number, complete, path) "
+                  "(visit_id, sensor_name, complete, path) "
                   "VALUES (?,?,?,?)",
-                  [catalog_name, sensor_number, complete, pathname])
+                  [visit_id, raft_id, sensor_id, complete, pathname])
         c.close()
         self.conn.commit()
 
     # this should: toggle the complete flag from false to true if there are no
     # incomplete sensor_visits for this particular catalog.
-    def update_visit_status(self, catalog_name: str):
-        logger.info("update visit status for visit {}".format(catalog_name))
+    def update_visit_status(self, visit_id: int):
+        logger.info("update visit status for visit {}".format(visit_id))
 
         c = self.conn.cursor()
 
         c.execute("SELECT COUNT(*) FROM sensor_visit "
-                  "WHERE catalog_name=? AND NOT complete", [catalog_name])
+                  "WHERE visit_id=? AND NOT complete", [visit_id])
         (count,) = c.fetchone()
         logger.info("update_visit_state: {} known incomplete sensor-visits"
                     .format(count))

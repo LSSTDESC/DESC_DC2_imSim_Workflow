@@ -19,12 +19,13 @@ def determine_instcat_work(instcat_list, outfile):
     sensors_list = [run20_region.trim_sensors(instcat) for instcat in instcat_list]
     work_data = [ [instcat, sensors] for (instcat, sensors) in zip(instcat_list, sensors_list)]
     for work in work_data:
-        # first we want to add the instance catalog to the database.
-        visitname = os.path.basename(os.path.normpath(work[0]))
-        db.put_visit(visitname)
+        # first we want to add the instance catalog number.
+        visit_id = int(os.path.basename(os.path.normpath(work[0])).split('_')[-1].split('.txt')[0])
+        db.put_visit(visit_id)
         # and then for each sensor, we want to add it to the database.
         for sensor in work[1]:
-            db.init_sensor_visit(visitname, sensor, False)
+            sensor_name = ''.join([s for s in sensor if s.isdigit()])
+            db.init_sensor_visit(visit_id, sensor_name, False)
         numobj = [0 for sensor in work[1] ]
         work.append(numobj)
 
