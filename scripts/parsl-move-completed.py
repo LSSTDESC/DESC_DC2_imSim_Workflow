@@ -17,7 +17,7 @@ worklistpath = str(sys.argv[3]) # a list of visits and sensors that have been op
 #3. Sync those up with the longterm root directory to make sure that everything is in the right place.
 
 if worklistpath == 'WALK_ALL':
-    print('walking all possible output files!')
+    print('walking all possible output files in {}!'.format(runtime_root))
     output_paths = glob.glob(os.path.join(runtime_root,'*/*/'))
     longterm_paths = [os.path.join(longterm_root, '/'.join(output_path.split('/')[-3:])) for output_path in output_paths]
 else:
@@ -42,16 +42,15 @@ for output_path, longterm_path in zip(output_paths, longterm_paths):
         matchstring = fits_grab.split('_R')[-1].split('.fits')[0][:-2]
         match_files = [file_grab for file_grab in files_grabbed if matchstring in file_grab]
         # Here in addition to moving the file, we'll want to update the database!
+        visit_id = int(os.path.basename(os.path.normpath(fits_grab)).split('_R')[0].split('_')[-1])
         if not any('.ckpt' in file_grab for file_grab in match_files):
-            visit_id = int(os.path.basename(os.path.normpath(fits_grab)).split('_R')[0].split('_')[-1])
             sensor_name = ''.join([s for s in os.path.basename(os.path.normpath(fits_grab)).split('_R')[1] if s.isdigit()])
             db.put_sensor_visit(visit_id, sensor_name, 'True', fits_grab)
-            print('moving: {}'.format(match_files))
             if not os.path.exists(longterm_path):
                 os.makedirs(longterm_path)
             for file_grab in match_files:
                 subprocess.call(["rsync", "-azh", "--ignore-existing", file_grab, longterm_path]) 
-
+    db.update_visit_status(visit_id)
 
 print("parsl-move-completed: finished")
 sys.exit(0)

@@ -1,6 +1,6 @@
 import logging
 import sqlite3
-import parsl
+#import parsl
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +9,7 @@ class ProgressDB:
     def __init__(self):
         logger.info("progress db init, with sqlite3 version {}".format(
                     sqlite3.sqlite_version))
-        self.conn = sqlite3.connect('progress.db')
+        self.conn = sqlite3.connect('/global/homes/a/asv13/progress.db')
 
         c = self.conn.cursor()
         c.execute(
@@ -22,7 +22,7 @@ class ProgressDB:
             "sensor_name TEXT NOT NULL, "
             "complete BOOLEAN NOT NULL, "
             "path TEXT, "
-            "PRIMARY KEY (visit_id, sensor_nanme))")
+            "PRIMARY KEY (visit_id, sensor_name))")
         c.close()
         self.conn.commit()
 
@@ -65,7 +65,7 @@ class ProgressDB:
         c.execute("INSERT OR REPLACE INTO sensor_visit "
                   "(visit_id, sensor_name, complete, path) "
                   "VALUES (?,?,?,?)",
-                  [visit_id, raft_id, sensor_id, complete, pathname])
+                  [visit_id, sensor_name, complete, pathname])
         c.close()
         self.conn.commit()
 
@@ -92,7 +92,7 @@ class ProgressDB:
 
 if __name__ == '__main__':
 
-    parsl.set_stream_logger(name=__name__)
+    #parsl.set_stream_logger(name=__name__)
 
     logger.info("progressdb: start")
     db = ProgressDB()
