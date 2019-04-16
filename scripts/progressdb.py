@@ -15,6 +15,7 @@ class ProgressDB:
         c.execute(
             "CREATE TABLE IF NOT EXISTS visit "
             "(visit_id INTEGER NOT NULL PRIMARY KEY, "
+            "field BOOLEAN NOT NULL, "
             "complete BOOLEAN NOT NULL)")
         c.execute(
             "CREATE TABLE IF NOT EXISTS sensor_visit "
@@ -36,11 +37,11 @@ class ProgressDB:
         else:
             return True
 
-    def put_visit(self, visit_id: int):
+    def put_visit(self, visit_id: int, field: bool):
         logger.info("put visit: {}".format(visit_id))
         c = self.conn.cursor()
-        c.execute("INSERT OR IGNORE INTO visit (visit_id, complete) "
-                  "VALUES(?, 'false')", [visit_id])
+        c.execute("INSERT OR IGNORE INTO visit (visit_id, field, complete) "
+                  "VALUES(?, ?, 'false')", [visit_id])
         c.close()
         self.conn.commit()
 
