@@ -5,7 +5,6 @@ import json
 import sys
 import os
 
-import instcat_trimmer as ict
 import job_bundling_utils as jbu
 
 

@@ -157,10 +157,11 @@ if (not configuration.fake) and configuration.singularity_download:
     shifter_future = cache_shifter_image(configuration.singularity_img)
     shifter_future.result()
 
-if configuration.worklist_generate:
-  logger.info("generating worklist")
-  worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
-  worklist_future.result()
+# long enough now that this should be limited to pre-production if possible.
+#if configuration.worklist_generate:
+#  logger.info("generating worklist")
+#  worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
+#  worklist_future.result()
 
 logger.info("generating bundles")
 
