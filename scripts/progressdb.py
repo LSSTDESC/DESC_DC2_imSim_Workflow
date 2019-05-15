@@ -9,13 +9,12 @@ class ProgressDB:
     def __init__(self):
         logger.info("progress db init, with sqlite3 version {}".format(
                     sqlite3.sqlite_version))
-        self.conn = sqlite3.connect('/global/homes/a/asv13/progress.db')
+        self.conn = sqlite3.connect('/global/homes/d/descim/ALCF_1.2i/progress_run2.1i.db')
 
         c = self.conn.cursor()
         c.execute(
             "CREATE TABLE IF NOT EXISTS visit "
             "(visit_id INTEGER NOT NULL PRIMARY KEY, "
-            "field BOOLEAN NOT NULL, "
             "complete BOOLEAN NOT NULL)")
         c.execute(
             "CREATE TABLE IF NOT EXISTS sensor_visit "
@@ -37,11 +36,11 @@ class ProgressDB:
         else:
             return True
 
-    def put_visit(self, visit_id: int, field: bool):
+    def put_visit(self, visit_id: int):
         logger.info("put visit: {}".format(visit_id))
         c = self.conn.cursor()
-        c.execute("INSERT OR IGNORE INTO visit (visit_id, field, complete) "
-                  "VALUES(?, ?, 'false')", [visit_id])
+        c.execute("INSERT OR IGNORE INTO visit (visit_id, complete) "
+                  "VALUES(?, 'false')", [visit_id])
         c.close()
         self.conn.commit()
 
