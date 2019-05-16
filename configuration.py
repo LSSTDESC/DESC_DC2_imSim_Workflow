@@ -207,12 +207,18 @@ cori_queue_executor = HighThroughputExecutor(
 local_executor = ThreadPoolExecutor(max_threads=2, label="submit-node")
 
 if MACHINEMODE == "cori":
-  parsl_config = Config(
-      executors=[ cori_in_salloc_executor, local_executor ],
-      run_dir="{}/runinfo/".format(work_and_out_path)
+    parsl_config = Config(
+        executors=[ cori_in_salloc_executor, local_executor ],
+        run_dir="{}/runinfo/".format(work_and_out_path),
+        monitoring=MonitoringHub(
+            hub_address=address_by_hostname(),
+            hub_port=55055,
+            logging_level=logging.INFO,
+            resource_monitoring_interval=10,
+        )
     )
 elif MACHINEMODE == "theta":
-  parsl_config = Config(
-      executors=[ theta_executor, local_executor ],
-      strategy=None
+    parsl_config = Config(
+        executors=[ theta_executor, local_executor ],
+        strategy=None
     )
