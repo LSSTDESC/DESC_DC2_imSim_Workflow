@@ -29,14 +29,12 @@ bundles = sys.argv[3]
 # Note that the paths here are important; these need to match your later ingest into imSim for
 # singularity input binds.
 
-# currently chosen to simulate up through Year 3.
-yearlimit = 743027
 
 # search string assumes that the instance catalog base directory is subdivided one time into sections of time
 globstr = '{}/*/*/phosim_cat*.txt'.format(inst_cat_root)
 print("parsl-initial-bundle: globbing {}".format(globstr))
 instcat_list_temp = glob.glob(globstr)
-instcat_list_a = [instcat for instcat in instcat_list_temp if int((instcat.split('_')[-1]).split('.')[0]) <= yearlimit]
+instcat_list_a = [instcat for instcat in instcat_list_temp]
 
 print("parsl-initial-bundle: globbed: {}".format(instcat_list_a))
 print("parsl-initial-bundle: globbed {} instance catalogs".format(len(instcat_list_a)))

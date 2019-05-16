@@ -71,7 +71,7 @@ validate_transfer = False
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
-worklist_generate = False
+worklist_generate = True
 
 # set to true to use fake short sleep instead of singularity
 fake = False

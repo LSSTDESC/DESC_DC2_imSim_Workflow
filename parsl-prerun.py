@@ -71,11 +71,13 @@ if (not configuration.fake) and configuration.singularity_download:
     shifter_future = cache_shifter_image(configuration.singularity_img)
     shifter_future.result()
 
+# this is unused in favor of globus transfers for speed. Globus hooks may be integrated
+# if they ever fix this for collaborative accounts.
 # then, transfer all desired files via a tarball list.
-if configuration.validate_transfer:
-  logger.info("validating transfer")
-  validate_future = validate_transfer(container_wrapper, configuration.inst_cat_root, configuration.tarball_list)
-  validate_future.result()
+#if configuration.validate_transfer:
+#  logger.info("validating transfer")
+#  validate_future = validate_transfer(container_wrapper, configuration.inst_cat_root, configuration.tarball_list)
+#  validate_future.result()
 
 # then generate a worklist given all desired files have been transferred.
 if configuration.worklist_generate:
