@@ -1,4 +1,5 @@
 import os
+import logging
 from parsl.config import Config
 
 from parsl.addresses import address_by_hostname
@@ -8,6 +9,7 @@ from parsl.addresses import address_by_hostname
 from parsl.providers import CobaltProvider
 from parsl.launchers import SimpleLauncher
 from parsl.executors.threads import ThreadPoolExecutor
+from parsl.monitoring.monitoring import MonitoringHub
 
 # for cori htc
 from parsl.providers import LocalProvider
@@ -71,7 +73,7 @@ validate_transfer = False
 
 # should we re-generate the initial worklist or assume that
 # what is on disk in original_work_list is sufficient?
-worklist_generate = True
+worklist_generate = False
 
 # set to true to use fake short sleep instead of singularity
 fake = False
@@ -173,7 +175,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 3,
+                nodes_per_block = 1999,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,
