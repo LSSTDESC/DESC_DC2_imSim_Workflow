@@ -56,11 +56,11 @@ work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/"
 
 # singularity image containing the ALCF_1.2i distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-singularity_img = "avillarreal/alcf_run2.0i:production201903" # -- cori/shifter
+singularity_img = "avillarreal/alcf_run2.0i:production201907-test" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
-singularity_url = "docker://avillarreal/alcf_run2.0i:production201903"
+singularity_url = "docker://avillarreal/alcf_run2.0i:production201907-test"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
@@ -175,7 +175,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 1999,
+                nodes_per_block = 7,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,

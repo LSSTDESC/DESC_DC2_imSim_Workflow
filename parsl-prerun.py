@@ -80,7 +80,6 @@ if (not configuration.fake) and configuration.singularity_download:
 #  validate_future.result()
 
 # then generate a worklist given all desired files have been transferred.
-if configuration.worklist_generate:
-  logger.info("generating worklist")
-  worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
-  worklist_future.result()
+logger.info("generating worklist")
+worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
+worklist_future.result()

@@ -31,7 +31,8 @@ parsl.load(configuration.parsl_config)
 # hardcode shifter / singularity command lines all
 # over the place.
 def shifter_wrapper(img, cmd):
-  wrapped_cmd = "shifter --entrypoint --image={} {}".format(img, cmd)
+#  wrapped_cmd = "shifter --entrypoint --image={} /global/homes/d/descim/ALCF_1.2i/docker_run.sh python {}".format(img, cmd)
+  wrapped_cmd = "shifter --image={} /global/homes/d/descim/ALCF_1.2i/docker_run.sh python {}".format(img, cmd)
   return wrapped_cmd
 
 @bash_app(executors=['submit-node'])
