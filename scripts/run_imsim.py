@@ -34,7 +34,8 @@ def get_sensor_list(bundle_lists, node_id, visit_index):
 
 def run_imsim(instcat, workdir, outdir, processes, low_fidelity,
               subset_size, subset_index, file_id=None, bundle_lists=None,
-              node_id='node0', visit_index=0, log_level='INFO', config=None):
+              node_id='node0', visit_index=0, log_level='INFO',
+              ckpt_archive_dir=None, config=None):
 
     logger = desc.imsim.get_logger(log_level, 'run_imsim')
 
@@ -83,6 +84,7 @@ def run_imsim(instcat, workdir, outdir, processes, low_fidelity,
                                     create_centroid_file=True, 
                                     file_id=file_id, 
                                     log_level=log_level,
+                                    ckpt_archive_dir=ckpt_archive_dir,
                                     config=config)
     image_simulator.run(processes=processes, node_id=node_id)
 
@@ -129,10 +131,15 @@ if __name__=='__main__':
     parser.add_argument('--config', type=str, default=None,
                         help='Configuration file for imSim.'
                         'If not None, this overrides the default imsim configuration.')
+    parser.add_argument('--ckpt_archive_dir', type=str, default=None,
+                        help='Archive directory for checkpoint files. '
+                        'If None, then delete them (if the checkpointing.cleanup '
+                        'configuration is True).')
     args = parser.parse_args()
 
     run_imsim(args.instcat, args.workdir, args.outdir, args.processes,
               args.low_fidelity, args.subset_size, args.subset_index,
               args.file_id, bundle_lists=args.bundle_lists,
               node_id=args.node_id, visit_index=args.visit_index,
-              log_level=args.log_level, config=args.config)
+              log_level=args.log_level, ckpt_archive_dir=args.ckpt_archive_dir, 
+              config=args.config)
