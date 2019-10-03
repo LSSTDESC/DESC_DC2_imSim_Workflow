@@ -31,35 +31,37 @@ parsl.load(configuration.parsl_config)
 # hardcode shifter / singularity command lines all
 # over the place.
 def shifter_wrapper(img, cmd):
-#  wrapped_cmd = "shifter --entrypoint --image={} /global/homes/d/descim/ALCF_1.2i/docker_run.sh python {}".format(img, cmd)
-  wrapped_cmd = "shifter --image={} /global/homes/d/descim/ALCF_1.2i/docker_run.sh python {}".format(img, cmd)
+  wrapped_cmd = "shifter --image={} /global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/docker_run.sh python {}".format(img, cmd)
   return wrapped_cmd
+
+def singularity_wrapper(img, inst_cat_root, work_and_out_path, cmd):
+  wrapped_cmd = "singularity exec -H /lus/theta-fs0/projects/LSSTADSP_DESC/Run2.1i -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.1i/ALCF_1.2i/docker_run.sh python {}".format(inst_cat_root, work_and_out_path, img, cmd)
+  return wrapped_cmd
+
 
 @bash_app(executors=['submit-node'])
 def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
     c = wrap(base)
     logger.debug("validate_transfer command is: {}".format(c))
     return c   
 
 @bash_app(executors=['submit-node'])
 def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
     c = wrap(base)
     logger.debug("generate_worklist command is: {}".format(c))
     return c
-#    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
 @bash_app(executors=['submit-node'])
 def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
+    c = wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
     logger.debug("generate_bundles command is: {}".format(c))
     return c
-    # return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 @bash_app(executors=['submit-node'])
 def archive_completed(wrap, runtime_root: str, work_json: str, longterm_root: str):
-    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, longterm_root, work_json))
+    c = wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, longterm_root, work_json))
     logger.debug("archive_completed command is: {}".format(c))
     return c
 
@@ -82,10 +84,7 @@ def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_c
     import re
     prefix_cmd = "echo DEBUG: info pre singularity; date ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launching singularity blocks ; ulimit -Sv 120000000 ; "
 
-    #debugger_cmd = " python /globalprocess_monitor.py arguments &; TASK_PID=$!; for (i in $(seq 1 120); do echo DEBUGLOOP; date; free-m; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu; echo END DEBUGLOOP; sleep 1m; if [$i -gt 119]; then kill $TASK_PID; fi; done ) &"
     debugger_cmd = " (for i in $(seq 1 300); do echo DEBUGLOOP; date ; free -m ; ps ax -o command,pid,ppid,vsize,rss,%mem,size,%cpu ; echo END DEBUGLOOP ; sleep 1m ; done ) & "
-    # debugger_cmd = "echo starting with no debug loop ;"
-    # debugger_cmd = " (for i in $(seq 1 120); do echo DEBUGLOOPJIM; ps auxww | grep python | grep -v grep; echo END DEBUGLOOPJIM ; sleep 1m; done ) & "
 
     postfix_cmd = " echo waiting ; wait ; echo done waiting "
 
@@ -103,20 +102,17 @@ def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_c
       pathbase = "{}/run/{}/".format(work_and_out_base, stuff_b)
       outdir = pathbase + ""   # just in case we want to separate these
       workdir = pathbase + ""
+      ckpt_archive_dir = pathbase + "/agn_ckpts/"
 
       # filename in phosim_txt_fn will look like: phosim_cat_1909355.txt
       # extract the numeric part of that
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
-#
-#--image=avillarreal/alcf_run2.0i /global/homes/b/bxc/run201811/ALCF_1.2i/scripts/parsl-bundle.py
-      body_cmd += wrap("/global/homes/d/descim/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} --config {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index, imsim_config))
-      # body_cmd += "singularity run -B {},{},/projects/LSSTADSP_DESC {} --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} & ".format(inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index)
 
+      body_cmd += wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} --ckpt_archive_dir {} --config {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index, ckpt_archive_dir, imsim_config))
 
     whole_cmd = prefix_cmd + debugger_cmd + body_cmd + postfix_cmd
     print("whole_cmd: %{}".format(whole_cmd))
     return whole_cmd
-    # return "echo DEBUG: info pre singularity; date ;  echo DEBUG: sensor count is {} ; echo DEBUG: id; id ; echo DEBUG: HOME = $HOME; echo DEBUG: hostnaee ; hostname ; echo DEBUG: ls ~ ; ls ~ ; echo DEBUG: launch singularity ; singularity run -B {},{} {} --workdir {} --outdir {} --low_fidelity --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {}".format(sensor_count, inst_cat_root, work_and_out_base, singularity_img_path, outdir, workdir, checkpoint_file_id, nthreads, bundle_lists, nodeid, visit_index)
 
 def trickle_submit(bundle_lists, task_info):
 
@@ -140,13 +136,11 @@ def trickle_submit(bundle_lists, task_info):
 
   return future
 
-
-#logger.info("listing instance catalogs")
-# This glob came from Jim Chiang
-#instance_catalogs = glob.glob('{}/DC2-R1*/0*/instCat/phosim_cat*.txt'.format(configuration.inst_cat_root))
-#logger.info("there are {} instance catalogs to process".format(len(instance_catalogs)))
-
-container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+if configuration.MACHINEMODE == "cori":
+  container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+elif configuration.MACHINEMODE == "theta":
+  container_wrapper = partial(singularity_wrapper, configuration.singularity_img, configuration.inst_cat_root,
+                            configuration.work_and_out_path)
 
 logger.info("caching container image")
 

@@ -15,11 +15,12 @@ from parsl.monitoring.monitoring import MonitoringHub
 from parsl.providers import LocalProvider
 from parsl.providers import SlurmProvider
 from parsl.launchers import SrunLauncher
+from parsl.launchers import AprunLauncher
 from parsl.executors import HighThroughputExecutor
 
 # some configuration varies based on machine, and this
 # will swtich.
-# choose either "core" or "theta"
+# choose either "core" or "theta" or "theta_local"
 MACHINEMODE="cori"
 
  # this should scale up to 802 in real life, or up to 8 or 16 in debug queue
@@ -42,7 +43,7 @@ MACHINEMODE="cori"
 #THETA_QUEUE="default"
 #WALLTIME="05:50:00"
 
-COMPUTE_NODES=5000
+COMPUTE_NODES=3000
 THETA_QUEUE="R.LSSTADSP_DESC"
 CORI_QUEUE="debug" # or debug
 WALLTIME="00:25:00"
@@ -51,16 +52,16 @@ ACCOUNT="LSSTADSP_DESC"
 
 
 # /-terminated path to work and output base dir
-work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/"
+work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/run_agntest20190807/"
 #work_and_out_path = "/global/cscratch1/sd/descim/test/workpath/"
 
 # singularity image containing the ALCF_1.2i distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-singularity_img = "avillarreal/alcf_run2.0i:production201907-test" # -- cori/shifter
+singularity_img = "avillarreal/alcf_run2.0i:Run2.1.1i-test" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/ALCF_1.2i"
-singularity_url = "docker://avillarreal/alcf_run2.0i:production201907-test"
+singularity_url = "docker://avillarreal/alcf_run2.0i:Run2.1.1-test"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
@@ -78,18 +79,12 @@ worklist_generate = False
 # set to true to use fake short sleep instead of singularity
 fake = False
 
-tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_tarballs.json"
-imsim_config = "/global/homes/d/descim/ALCF_1.2i/parsl_imsim_configs"
+#tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_tarballs.json"
+imsim_config = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/parsl_imsim_configs"
 
 archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"
 
-inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1i/instCat/"
-# inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
-# inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.0i/instCat/fixed_dust_180919/"
-# inst_cat_root = "/projects/LSSTADSP_DESC/Run2.0i_fixed/fixed_dust_new/"
-# inst_cat_root = "/projects/LSSTADSP_DESC/ALCF_1.2i/inputs/"
-# inst_cat_root = "/projects/LSSTADSP_DESC/benc/2.0i_sample/inputs/"
-
+inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/instCat/"
 
 # trickle-loop parameters
 # submit 10% more jobs than we have nodes for so that there are
@@ -100,7 +95,6 @@ rebalance_seconds = 60 * 60
 #rebalance_seconds = 4 * 60 * 60
 
 trickle_loop_seconds = 60
-
 
 # the (expensive to generate) overall work list, which will include
 # everything we think needs to have been done, whether it has or not
@@ -139,31 +133,26 @@ ulimit -Sv 120000000
 export SINGULARITY_HOME=/home/antoniov                                                                                                                                                                                                                     
 export OMP_NUM_THREADS=1"""
 
-"""
-Commented out because MPIExecutor does not exist
-in the version of parsl we're going to use for
-this run -- it's been replaced by HighThoughputExector
-and ExtremeScaleExecutor.
-theta_executor = MPIExecutor(
-            label="worker-nodes",
-            jobs_q_url=JOB_URL,
-            results_q_url=RESULT_URL,
-            launch_cmd=launch_cmd,
-            provider=CobaltProvider(
-                queue=THETA_QUEUE,
-                launcher=SimpleLauncher(),
-                walltime=WALLTIME,
-                nodes_per_block=COMPUTE_NODES,
-                tasks_per_node=1,
+aprun_overrides = """-cc depth -j 1 -d 64"""
+
+theta_executor = HighThroughputExecutor(
+            label='worker-nodes',
+            address=address_by_hostname(),
+            worker_debug=True,
+            suppress_failure=False,
+            poll_period = 5000,
+            cores_per_worker = 256,
+            heartbeat_period = 300,
+            heartbeat_threshold = 1200,
+            provider=LocalProvider(
+                nodes_per_block = 8,
                 init_blocks=1,
+                min_blocks=1,
                 max_blocks=1,
-                overrides=overrides,
-                account=ACCOUNT,
-                cmd_timeout=60
+                launcher=AprunLauncher(overrides=aprun_overrides),
+                walltime=WALLTIME
             ),
         )
-"""
-theta_executor =  None # just to avoid an error when testing
 
 cori_in_salloc_executor = HighThroughputExecutor(
             label='worker-nodes',
@@ -175,7 +164,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 7,
+                nodes_per_block = 299,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,
@@ -222,5 +211,23 @@ if MACHINEMODE == "cori":
 elif MACHINEMODE == "theta":
     parsl_config = Config(
         executors=[ theta_executor, local_executor ],
-        strategy=None
+        remote_side_bash_executor_log_base="/projects/LSSTADSP_DESC/Run2.1i/run201905/bashlogs/",
+        run_dir="{}/runinfo/".format(work_and_out_path),
+        monitoring=MonitoringHub(
+            hub_address=address_by_hostname(),
+            hub_port=55055,
+            logging_level=logging.DEBUG,
+            resource_monitoring_interval=3*60,
+        )
+    )
+elif MACHINEMODE == "theta_local":
+    parsl_config = Config(
+        executors=[local_executor],
+        run_dir="{}/runinfo/".format(work_and_out_path),
+        monitoring=MonitoringHub(
+            hub_address=address_by_hostname(),
+            hub_port=55055,
+            logging_level=logging.DEBUG,
+            resource_monitoring_interval=3*60,
+        )
     )

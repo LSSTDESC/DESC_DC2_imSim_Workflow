@@ -34,20 +34,23 @@ def shifter_wrapper(img, cmd):
   wrapped_cmd = "shifter --entrypoint --image={} {}".format(img, cmd)
   return wrapped_cmd
 
+def singularity_wrapper(img, inst_cat_root, work_and_out_path, cmd):
+  wrapped_cmd = "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.1i/ALCF_1.2i/docker_run.sh {}".format(inst_cat_root, work_and_out_path, img, cmd)
+  return wrapped_cmd
+
 @bash_app(executors=['submit-node'])
 def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
     c = wrap(base)
     logger.debug("validate_transfer command is: {}".format(c))
     return c   
 
 @bash_app(executors=['submit-node'])
 def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
     c = wrap(base)
     logger.debug("generate_worklist command is: {}".format(c))
     return c
-#    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
 
 @bash_app(executors=['submit-node'])
@@ -58,7 +61,14 @@ def cache_singularity_image(local_file, url):
 def cache_shifter_image(image_tag):
     return "shifterimg -v pull {}".format(image_tag)
 
-container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+if configuration.MACHINEMODE == "cori":
+  container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+elif configuration.MACHINEMODE == "theta":
+  container_wrapper = partial(singularity_wrapper, configuration.singularity_img, configuration.inst_cat_root,
+                            configuration.work_and_out_path)
+elif configuration.MACHINEMODE == "theta_local":
+  container_wrapper = partial(singularity_wrapper, configuration.singularity_img, configuration.inst_cat_root,
+                            configuration.work_and_out_path)
 
 logger.info("caching container image")
 
