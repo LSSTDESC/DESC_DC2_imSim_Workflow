@@ -55,12 +55,12 @@ ACCOUNT="LSSTADSP_DESC"
 work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/run_agntest20190807/"
 #work_and_out_path = "/global/cscratch1/sd/descim/test/workpath/"
 
-# singularity image containing the ALCF_1.2i distro
+# singularity image containing the DESC_DC2_imSim_Workflow distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
 singularity_img = "avillarreal/alcf_run2.0i:Run2.1.1i-test" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
-#singularity_url = "shub://benclifford/ALCF_1.2i"
+#singularity_url = "shub://benclifford/DESC_DC2_imSim_Workflow"
 singularity_url = "docker://avillarreal/alcf_run2.0i:Run2.1.1-test"
 
 # whether to download the singularity image or to
@@ -80,7 +80,7 @@ worklist_generate = False
 fake = False
 
 #tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_tarballs.json"
-imsim_config = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/parsl_imsim_configs"
+imsim_config = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/parsl_imsim_configs"
 
 archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"
 

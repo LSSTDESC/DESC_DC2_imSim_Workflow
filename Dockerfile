@@ -13,7 +13,7 @@ RUN set +e &&\
   setup -t DC2production sims_skybrightness_data &&\
   cd /DC2 &&\
   git clone https://github.com/LSSTDESC/imSim.git &&\
-  git clone https://github.com/LSSTDESC/ALCF_1.2i.git &&\
+  git clone https://github.com/LSSTDESC/DESC_DC2_imSim_Workflow.git &&\
   git clone https://github.com/lsst/sims_GalSimInterface.git &&\
   setup -r imSim -j &&\
   setup -r sims_GalSimInterface -j &&\
@@ -23,8 +23,8 @@ RUN set +e &&\
   cd ../sims_GalSimInterface &&\
   git checkout DC2-Run2.2i-rc &&\
   scons &&\
-  cd ../ALCF_1.2i &&\
+  cd ../DESC_DC2_imSim_Workflow &&\
   git checkout production201903
-ENTRYPOINT ["/DC2/ALCF_1.2i/docker_run.sh"]
+ENTRYPOINT ["/DC2/DESC_DC2_imSim_Workflow/docker_run.sh"]
 CMD ["echo You must specify a command to run inside the LSST ALCF container"]
 

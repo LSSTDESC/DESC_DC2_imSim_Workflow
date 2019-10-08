@@ -4,7 +4,7 @@ desc2.0i using a parsl driver
 
 0. Do all of the below on a theta login node.
 
-1. Ensure an ALCF_1.2i singularity image exists on
+1. Ensure an DESC_DC2_imSim_Workflow singularity image exists on
    Singularity Hub.
 
 Making that happen is outside the scope of this document.

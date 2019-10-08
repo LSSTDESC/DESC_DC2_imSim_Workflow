@@ -31,37 +31,37 @@ parsl.load(configuration.parsl_config)
 # hardcode shifter / singularity command lines all
 # over the place.
 def shifter_wrapper(img, cmd):
-  wrapped_cmd = "shifter --image={} /global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/docker_run.sh python {}".format(img, cmd)
+  wrapped_cmd = "shifter --image={} /global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/docker_run.sh python {}".format(img, cmd)
   return wrapped_cmd
 
 def singularity_wrapper(img, inst_cat_root, work_and_out_path, cmd):
-  wrapped_cmd = "singularity exec -H /lus/theta-fs0/projects/LSSTADSP_DESC/Run2.1i -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.1i/ALCF_1.2i/docker_run.sh python {}".format(inst_cat_root, work_and_out_path, img, cmd)
+  wrapped_cmd = "singularity exec -H /lus/theta-fs0/projects/LSSTADSP_DESC/Run2.1i -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.1i/DESC_DC2_imSim_Workflow/docker_run.sh python {}".format(inst_cat_root, work_and_out_path, img, cmd)
   return wrapped_cmd
 
 
 @bash_app(executors=['submit-node'])
 def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
-    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
     c = wrap(base)
     logger.debug("validate_transfer command is: {}".format(c))
     return c   
 
 @bash_app(executors=['submit-node'])
 def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
-    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
     c = wrap(base)
     logger.debug("generate_worklist command is: {}".format(c))
     return c
 
 @bash_app(executors=['submit-node'])
 def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    c = wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
+    c = wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
     logger.debug("generate_bundles command is: {}".format(c))
     return c
 
 @bash_app(executors=['submit-node'])
 def archive_completed(wrap, runtime_root: str, work_json: str, longterm_root: str):
-    c = wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, longterm_root, work_json))
+    c = wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-move-completed.py {} {} {}".format(runtime_root, longterm_root, work_json))
     logger.debug("archive_completed command is: {}".format(c))
     return c
 
@@ -108,7 +108,7 @@ def run_imsim_in_singularity(wrap, nthreads: int, work_and_out_base: str, inst_c
       # extract the numeric part of that
       (checkpoint_file_id, subs) = re.subn("[^0-9]","", phosim_txt_fn)
 
-      body_cmd += wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/ALCF_1.2i/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} --ckpt_archive_dir {} --config {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index, ckpt_archive_dir, imsim_config))
+      body_cmd += wrap("/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/run_imsim.py --workdir {} --outdir {} --file_id {} --processes {} --bundle_lists {} --node_id {} --visit_index {} --ckpt_archive_dir {} --config {} & ".format(outdir, workdir, checkpoint_file_id, sensor_count, bundle_lists, nodeid, visit_index, ckpt_archive_dir, imsim_config))
 
     whole_cmd = prefix_cmd + debugger_cmd + body_cmd + postfix_cmd
     print("whole_cmd: %{}".format(whole_cmd))
