@@ -20,9 +20,9 @@ bundles = sys.argv[3]
 # check job success and reincorporate unrun jobs.
 
 # To test this in small scale on a Singularity shell, utilize the following command:
-# "singularity shell -B /path/to/ALCF_1.2i/inputs:/mnt/cwd,/path/to/ALCF_1.2i/scripts:/mnt/scripts,
-#     /path/to/ALCF_1.2i/outputs:/mnt/outputs,/path/to/restarts:/mnt/restarts
-#     /path/to/ALCF_1.2i/imsim.simg"
+# "singularity shell -B /path/to/DESC_DC2_imSim_Workflow/inputs:/mnt/cwd,/path/to/DESC_DC2_imSim_Workflow/scripts:/mnt/scripts,
+#     /path/to/DESC_DC2_imSim_Workflow/outputs:/mnt/outputs,/path/to/restarts:/mnt/restarts
+#     /path/to/DESC_DC2_imSim_Workflow/imsim.simg"
 #
 
 # first, we set a group of instcat files to be ingested. Let's choose two for speed.
