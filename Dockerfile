@@ -1,4 +1,4 @@
-FROM lsstdesc/stack-sims:w_2018_39-sims_2_11_1-v2
+FROM lsstdesc/stack-sims:w_2019_37-sims_w_2019_37
 
 USER root
 RUN mkdir -p /DC2 &&\
@@ -8,38 +8,23 @@ RUN set +e &&\
   source scl_source enable devtoolset-6 &&\
   set -e &&\ 
   source /opt/lsst/software/stack/loadLSST.bash &&\
-  setup lsst_sims &&\
+  setup lsst_sims -t sims_w_2019_37 &&\
+  setup -t DC2production throughputs &&\
+  setup -t DC2production sims_skybrightness_data &&\
   cd /DC2 &&\
-  git clone https://github.com/lsst/sims_GalSimInterface.git &&\
   git clone https://github.com/LSSTDESC/imSim.git &&\
-  git clone https://github.com/lsst/obs_lsstCam.git &&\
-  git clone https://github.com/lsst/obs_lsst.git &&\
-  git clone https://github.com/LSSTDESC/ALCF_1.2i.git &&\
-  git clone https://github.com/GalSim-developers/GalSim.git &&\
-  setup -r sims_GalSimInterface -j &&\
+  git clone https://github.com/LSSTDESC/DESC_DC2_imSim_Workflow.git &&\
+  git clone https://github.com/lsst/sims_GalSimInterface.git &&\
   setup -r imSim -j &&\
-  setup -r obs_lsstCam -j &&\
-  cd obs_lsst &&\
-  eups declare -r . obs_lsst -t current &&\
-  setup -r . -j &&\
+  setup -r sims_GalSimInterface -j &&\
+  cd imSim &&\
+  git checkout DC2-Run2.2i-rc &&\
   scons &&\
   cd ../sims_GalSimInterface &&\
-  git checkout master &&\
-  set +e &&\
-  scons || echo 'ignored failure' &&\
-  set -e &&\
-  cd ../imSim &&\
-  git checkout master &&\
+  git checkout DC2-Run2.2i-rc &&\
   scons &&\
-  cd ../obs_lsstCam &&\
-  git checkout imsim-0.1.0 &&\
-  scons &&\
-  cd ../GalSim &&\
-  git checkout master &&\
-  eups declare -r . galsim -t current &&\
-  setup -r . -j &&\
-  set +e &&\
-  scons -Q WITH_UPS=True EIGEN_DIR=/opt/lsst/software/stack/stack/miniconda3-4.5.4-fcd27eb/Linux64/eigen/3.3.4.lsst1/include &&\
-  set -e
-ENTRYPOINT ["/DC2/ALCF_1.2i/docker_run.sh"]
+  cd ../DESC_DC2_imSim_Workflow &&\
+  git checkout production201903
+ENTRYPOINT ["/DC2/DESC_DC2_imSim_Workflow/docker_run.sh"]
 CMD ["echo You must specify a command to run inside the LSST ALCF container"]
+

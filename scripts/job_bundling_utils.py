@@ -181,6 +181,7 @@ def determine_remaining_jobs(infile, restartpath):
                                 temp_numobjs[key].append(numobj)
     remaining_work = [[key, temp_sensors[key], temp_numobjs[key]] for key in temp_sensors.keys()]
     print("determine_remaining_jobs: remaining_work has length {}".format(len(remaining_work)))
+    print("determine_remaining_jobs:  {}".format(remaining_work))
     print("determine_remaining_jobs: first remaining_work entry is {}".format(remaining_work[0]))
     return remaining_work
 
@@ -219,14 +220,14 @@ def check_job_success(infile, outpath, restartpath):
                 print("Checking for completed work: node {}, visit {}, sensor index = {}".format(node, visit, i))
                 sensor_nums = [str(s) for s in sensors[i] if s.isdigit()]
                 gz_sensorstr='R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
-                ckpt_sensorstr='R_'+sensor_nums[0]+'_'+sensor_nums[1]+'_S_'+sensor_nums[2]+'_'+sensor_nums[3]
+                ckpt_sensorstr='R'+sensor_nums[0]+sensor_nums[1]+'_S'+sensor_nums[2]+sensor_nums[3]
                 matchinggz = [s for s in files if gz_sensorstr in s]
                 check_gz = [s for s in matchinggz if '.fits' in s]
                 matchingckpt = [s for s in files if ckpt_sensorstr in s]
                 check_ckpt = [s for s in matchingckpt if '.ckpt' in s]
 
                 if check_gz and not check_ckpt:
-                    print("Found completed work: node {}, visit {}, sensor index = {}".format(node, visit, i))
+                    #print("Found completed work: node {}, visit {}, sensor index = {}".format(node, visit, i))
                     sensors[i] = []
                     numobjs[i] = []
                 else:

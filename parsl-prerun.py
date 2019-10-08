@@ -34,27 +34,24 @@ def shifter_wrapper(img, cmd):
   wrapped_cmd = "shifter --entrypoint --image={} {}".format(img, cmd)
   return wrapped_cmd
 
+def singularity_wrapper(img, inst_cat_root, work_and_out_path, cmd):
+  wrapped_cmd = "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.1i/DESC_DC2_imSim_Workflow/docker_run.sh {}".format(inst_cat_root, work_and_out_path, img, cmd)
+  return wrapped_cmd
+
 @bash_app(executors=['submit-node'])
 def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
     c = wrap(base)
     logger.debug("validate_transfer command is: {}".format(c))
     return c   
 
 @bash_app(executors=['submit-node'])
 def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
-    base = "/global/homes/d/descim/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
     c = wrap(base)
     logger.debug("generate_worklist command is: {}".format(c))
     return c
-#    return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json)
 
-@bash_app(executors=['submit-node'])
-def generate_bundles(wrap, inst_cat_root: str, work_and_out_base, work_json: str, bundle_json: str, bundler_restart_path: str):
-    c = wrap("/global/homes/d/descim/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path))
-    logger.debug("generate_bundles command is: {}".format(c))
-    return c
-    # return "singularity exec -B {},{},/projects/LSSTADSP_DESC {} /projects/LSSTADSP_DESC/Run2.0i-parsl/ALCF_1.2i/scripts/parsl-bundle.py {} {} {} {} {}".format(inst_cat_root, work_and_out_base, singularity_img_path, inst_cat_root, work_json, bundle_json, work_and_out_base + "/run/outputs/", bundler_restart_path)
 
 @bash_app(executors=['submit-node'])
 def cache_singularity_image(local_file, url):
@@ -64,7 +61,14 @@ def cache_singularity_image(local_file, url):
 def cache_shifter_image(image_tag):
     return "shifterimg -v pull {}".format(image_tag)
 
-container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+if configuration.MACHINEMODE == "cori":
+  container_wrapper = partial(shifter_wrapper, configuration.singularity_img)
+elif configuration.MACHINEMODE == "theta":
+  container_wrapper = partial(singularity_wrapper, configuration.singularity_img, configuration.inst_cat_root,
+                            configuration.work_and_out_path)
+elif configuration.MACHINEMODE == "theta_local":
+  container_wrapper = partial(singularity_wrapper, configuration.singularity_img, configuration.inst_cat_root,
+                            configuration.work_and_out_path)
 
 logger.info("caching container image")
 
@@ -77,32 +81,15 @@ if (not configuration.fake) and configuration.singularity_download:
     shifter_future = cache_shifter_image(configuration.singularity_img)
     shifter_future.result()
 
+# this is unused in favor of globus transfers for speed. Globus hooks may be integrated
+# if they ever fix this for collaborative accounts.
 # then, transfer all desired files via a tarball list.
-if configuration.validate_transfer:
-  logger.info("validating transfer")
-  validate_future = validate_transfer(container_wrapper, configuration.inst_cat_root, configuration.tarball_list)
-  validate_future.result()
+#if configuration.validate_transfer:
+#  logger.info("validating transfer")
+#  validate_future = validate_transfer(container_wrapper, configuration.inst_cat_root, configuration.tarball_list)
+#  validate_future.result()
 
 # then generate a worklist given all desired files have been transferred.
-if configuration.worklist_generate:
-  logger.info("generating worklist")
-  worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
-  worklist_future.result()
-
-logger.info("generating bundles")
-
-pathlib.Path(configuration.bundler_restart_path).mkdir(parents=True, exist_ok=True) 
-
-# then make some bundles. This can all work on the log-in node.
-bundle_future = generate_bundles(container_wrapper, configuration.inst_cat_root, configuration.work_and_out_path, configuration.original_work_list, configuration.bundle_lists, configuration.bundler_restart_path)
-
-bundle_future.result()
-
-logger.info("Loading bundles from {}".format(configuration.bundle_lists))
-
-with open(configuration.bundle_lists) as fp:
-  bundles = json.load(fp)
-logger.info("Created {} bundles".format(len(bundles)))
-
-logger.info("end of parsl-prerun")
-
+logger.info("generating worklist")
+worklist_future = generate_worklist(container_wrapper, configuration.inst_cat_root, configuration.original_work_list, configuration.bundle_lists)
+worklist_future.result()
