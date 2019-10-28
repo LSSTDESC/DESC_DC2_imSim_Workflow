@@ -7,9 +7,9 @@ import json
 
 import galsim
 import desc.imsim
-#from astropy.utils import iers
-#iers.conf.auto_download = False
-#iers.conf.auto_max_age = None
+from astropy.utils import iers
+iers.conf.auto_download = False
+iers.conf.auto_max_age = None
 
 #galsim.meta_data.share_dir = '/opt/lsst/software/stack/stack/miniconda3-4.5.4-fcd27eb/Linux64/galsim/2.1.4.lsst/share/galsim'
 galsim.meta_data.share_dir = '/opt/lsst/software/stack/stack/miniconda3-4.5.12-1172c30/Linux64/galsim/2.2.1.lsst/share/galsim'
