@@ -19,7 +19,7 @@ RUN set +e &&\
   git checkout v0.6.0 &&\
   scons &&\
   cd ../DESC_DC2_imSim_Workflow &&\
-  git checkout Run2.2i-validation
+  git checkout Run2.2i-validation-v2
 ENTRYPOINT ["/DC2/DESC_DC2_imSim_Workflow/docker_run.sh"]
 CMD ["echo You must specify a command to run inside the LSST ALCF container"]
 
