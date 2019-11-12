@@ -52,16 +52,16 @@ ACCOUNT="LSSTADSP_DESC"
 
 
 # /-terminated path to work and output base dir
-work_and_out_path = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/run_agntest20190807/"
+work_and_out_path = "/global/cscratch1/sd/descim/Run2.2i/y1-wfd/"
 #work_and_out_path = "/global/cscratch1/sd/descim/test/workpath/"
 
 # singularity image containing the DESC_DC2_imSim_Workflow distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-singularity_img = "avillarreal/alcf_run2.0i:Run2.1.1i-test" # -- cori/shifter
+singularity_img = "lsstdesc/dc2-imsim:Run2.2i-validation-v3" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/DESC_DC2_imSim_Workflow"
-singularity_url = "docker://avillarreal/alcf_run2.0i:Run2.1.1-test"
+singularity_url = "docker://lsstdesc/dc2-imsim:Run2.2i-validation-v3"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
@@ -80,11 +80,11 @@ worklist_generate = False
 fake = False
 
 #tarball_list = "/global/cscratch1/sd/desc/DC2/Run2.1i/run201903/firsttwoyears_tarballs.json"
-imsim_config = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/parsl_imsim_configs"
+imsim_config = "/global/cscratch1/sd/descim/Run2.2i/DESC_DC2_imSim_Workflow/parsl_imsim_configs"
 
 archive_base = "/global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/"
 
-inst_cat_root = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/instCat/"
+inst_cat_root = "/global/cscratch1/sd/descim/Run2.2i/instCat/"
 
 # trickle-loop parameters
 # submit 10% more jobs than we have nodes for so that there are
@@ -164,7 +164,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 299,
+                nodes_per_block = 1024,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,

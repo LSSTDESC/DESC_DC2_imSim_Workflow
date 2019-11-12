@@ -40,14 +40,14 @@ def singularity_wrapper(img, inst_cat_root, work_and_out_path, cmd):
 
 @bash_app(executors=['submit-node'])
 def validate_transfer(wrap, inst_cat_root: str, tarball_json: str):
-    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
+    base = "/global/cscratch1/sd/descim/Run2.2i/DESC_DC2_imSim_Workflow/scripts/parsl-validate-transfer.py {} {}".format(inst_cat_root, tarball_json)
     c = wrap(base)
     logger.debug("validate_transfer command is: {}".format(c))
     return c   
 
 @bash_app(executors=['submit-node'])
 def generate_worklist(wrap, inst_cat_root: str, work_json: str, bundle_json: str):
-    base = "/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
+    base = "/global/cscratch1/sd/descim/Run2.2i/DESC_DC2_imSim_Workflow/scripts/parsl-initial-worklist.py {} {} {}".format(inst_cat_root, work_json, bundle_json)
     c = wrap(base)
     logger.debug("generate_worklist command is: {}".format(c))
     return c
