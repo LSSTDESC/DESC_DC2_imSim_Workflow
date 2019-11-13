@@ -57,11 +57,11 @@ work_and_out_path = "/global/cscratch1/sd/descim/Run2.2i/y1-wfd/"
 
 # singularity image containing the DESC_DC2_imSim_Workflow distro
 #singularity_img = "benclifford/alcf_run2.0i:20181115e" # -- benc test
-singularity_img = "lsstdesc/dc2-imsim:Run2.2i-validation-v3" # -- cori/shifter
+singularity_img = "lsstdesc/dc2-imsim:Run2.2i-production-v1" # -- cori/shifter
 # singularity_img = work_and_out_path + "ALCF_1.2.simg" -- theta/singularity
 
 #singularity_url = "shub://benclifford/DESC_DC2_imSim_Workflow"
-singularity_url = "docker://lsstdesc/dc2-imsim:Run2.2i-validation-v3"
+singularity_url = "docker://lsstdesc/dc2-imsim:Run2.2i-production-v1"
 
 # whether to download the singularity image or to
 # use the local copy from (eg) a previous run
@@ -164,7 +164,7 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 1024,
+                nodes_per_block = 1999,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,
