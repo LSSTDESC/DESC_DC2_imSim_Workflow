@@ -1,10 +1,11 @@
 #!/bin/bash -l
 
 #SBATCH -q regular
-#SBATCH -N 2000
+#SBATCH -N 1024
+#SBATCH -k
 #SBATCH --constraint=knl
 #SBATCH --time=16:00:00
-#SBATCH --job-name="run2.2i-y1wfd-job1"
+#SBATCH --job-name="run2.2i-y1wfd-run6"
 #SBATCH --mail-user="avillarreal@anl.gov"
 #SBATCH --mail-type=ALL
 

@@ -45,8 +45,8 @@ MACHINEMODE="cori"
 
 COMPUTE_NODES=3000
 THETA_QUEUE="R.LSSTADSP_DESC"
-CORI_QUEUE="debug" # or debug
-WALLTIME="00:25:00"
+CORI_QUEUE="regular" # or debug
+WALLTIME="15:00:00"
 
 ACCOUNT="LSSTADSP_DESC"
 
@@ -164,11 +164,11 @@ cori_in_salloc_executor = HighThroughputExecutor(
             heartbeat_period = 300,
             heartbeat_threshold = 1200,
             provider=LocalProvider(
-                nodes_per_block = 1999,
+                nodes_per_block = 1023,
                 init_blocks=1,
                 min_blocks=1,
                 max_blocks=1,
-                launcher=SrunLauncher(),
+                launcher=SrunLauncher(overrides='--slurmd-debug=verbose'),
                 walltime=WALLTIME
             ),
         )
@@ -204,7 +204,7 @@ if MACHINEMODE == "cori":
         monitoring=MonitoringHub(
             hub_address=address_by_hostname(),
             hub_port=55055,
-            logging_level=logging.INFO,
+            monitoring_debug=False,
             resource_monitoring_interval=10,
         )
     )
@@ -216,7 +216,7 @@ elif MACHINEMODE == "theta":
         monitoring=MonitoringHub(
             hub_address=address_by_hostname(),
             hub_port=55055,
-            logging_level=logging.DEBUG,
+            monitoring_debug=False,
             resource_monitoring_interval=3*60,
         )
     )
@@ -227,7 +227,7 @@ elif MACHINEMODE == "theta_local":
         monitoring=MonitoringHub(
             hub_address=address_by_hostname(),
             hub_port=55055,
-            logging_level=logging.DEBUG,
+            monitoring_debug=False,
             resource_monitoring_interval=3*60,
         )
     )

@@ -211,8 +211,8 @@ while len(todo_tasks) > 0 or len(submitted_futures) > 0:
   logger.info("trickle loop: end iteration")
   time.sleep(configuration.trickle_loop_seconds)
 
-archive_future = archive_completed(container_wrapper, configuration.work_and_out_base+"run/outputs/", configuration.original_work_list, configuration.archive_base)
-archive_future.result()
+#archive_future = archive_completed(container_wrapper, configuration.work_and_out_base+"run/outputs/", configuration.original_work_list, configuration.archive_base)
+#archive_future.result()
 
 logger.info("end of parsl-driver")
 

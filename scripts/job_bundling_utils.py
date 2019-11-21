@@ -212,7 +212,7 @@ def check_job_success(infile, outpath, restartpath):
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
             print("Checking for completed work: node {}, visit {}".format(node, visit))
-            searchstring = str('/'.join(visit.split('/')[-3:-1])+'/')
+            searchstring = str('/'.join(visit.split('/')[-2:-1])+'/')
             pat = outpath+searchstring+'*'
             files = glob.glob(pat)
             print("Checking for completed work: node {}, visit {}: glob {} found {} names".format(node, visit, pat, len(files)))
