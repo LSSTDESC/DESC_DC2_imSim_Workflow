@@ -16,10 +16,10 @@ RUN set +e &&\
   git clone https://github.com/LSSTDESC/DESC_DC2_imSim_Workflow.git &&\
   setup -r imSim -j &&\
   cd imSim &&\
-  git checkout v0.6.1 &&\
+  git checkout v0.6.2 &&\
   scons &&\
   cd ../DESC_DC2_imSim_Workflow &&\
-  git checkout Run2.2i-production-v1
+  git checkout Run2.2i-production-v2
 ENTRYPOINT ["/DC2/DESC_DC2_imSim_Workflow/docker_run.sh"]
 CMD ["echo You must specify a command to run inside the LSST ALCF container"]
 
