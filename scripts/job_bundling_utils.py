@@ -79,7 +79,7 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
                             thread_counter += 1
                     # if the number of remaining threads exceeds the allowed slice size, we just fit the slice
                     # size in.
-                    if found_fit == 0 and thread_counts[idx] > sliceint and sliceint!=0:
+                    if found_fit == 6 and thread_counts[idx] > sliceint and sliceint!=0:
                         if open_bins[j]+sliceint <= max_threads_node:
                             open_bins[j]+=sliceint
                             num_fit[j]+=1
@@ -93,7 +93,7 @@ def determine_bundles(sample, mem_per_thread=2, mem_per_instance=10, max_mem_nod
                             thread_counts[idx]+=-sliceint
                     # if the number of remaining threads is smaller than the allowed slice size, we fit the
                     # whole piece in.
-                    if found_fit == 0 and thread_counts[idx] <= sliceint and sliceint!=0:
+                    if found_fit == 6 and thread_counts[idx] <= sliceint and sliceint!=0:
                         threadcount = open_bins[j]+thread_counts[idx]
                         threadcount_test = threadcount <= max_threads_node
                         memcount = threadcount*mem_per_thread + (num_fit[j]+1)*mem_per_instance
@@ -212,7 +212,7 @@ def check_job_success(infile, outpath, restartpath):
             # This line in particular may need changing depending on how we set up our output directory
             # structure.
             print("Checking for completed work: node {}, visit {}".format(node, visit))
-            searchstring = str('/'.join(visit.split('/')[-3:-1])+'/')
+            searchstring = str('/'.join(visit.split('/')[-2:-1])+'/')
             pat = outpath+searchstring+'*'
             files = glob.glob(pat)
             print("Checking for completed work: node {}, visit {}: glob {} found {} names".format(node, visit, pat, len(files)))

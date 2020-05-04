@@ -31,7 +31,7 @@ bundles = sys.argv[3]
 
 
 # search string assumes that the instance catalog base directory is subdivided one time into sections of time
-globstr = '{}/*/*/phosim_cat*.txt'.format(inst_cat_root)
+globstr = '{}/*/phosim_cat*.txt'.format(inst_cat_root)
 print("parsl-initial-bundle: globbing {}".format(globstr))
 instcat_list_temp = glob.glob(globstr)
 instcat_list_a = [instcat for instcat in instcat_list_temp]

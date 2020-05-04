@@ -9,7 +9,7 @@ class ProgressDB:
     def __init__(self):
         logger.info("progress db init, with sqlite3 version {}".format(
                     sqlite3.sqlite_version))
-        self.conn = sqlite3.connect('/global/cscratch1/sd/desc/DC2/Run2.1.1i/DESC_DC2_imSim_Workflow/progress_run2.1i.db')
+        self.conn = sqlite3.connect('/global/cscratch1/sd/descim/Run2.2i/DESC_DC2_imSim_Workflow/progress_run2.2i.db')
 
         c = self.conn.cursor()
         c.execute(

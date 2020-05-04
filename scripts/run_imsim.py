@@ -141,5 +141,5 @@ if __name__=='__main__':
               args.low_fidelity, args.subset_size, args.subset_index,
               args.file_id, bundle_lists=args.bundle_lists,
               node_id=args.node_id, visit_index=args.visit_index,
-              log_level=args.log_level, ckpt_archive_dir=args.ckpt_archive_dir, 
+              log_level=args.log_level, ckpt_archive_dir=os.path.abspath(args.ckpt_archive_dir), 
               config=args.config)
