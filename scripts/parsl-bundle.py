@@ -26,8 +26,8 @@ with open(worklist) as fp:
 mem_per_thread = 2      # the amount of memory a given sensor thread is expected to max out at
 mem_per_instance = 10   # the amount of shared memory an imSim container is expected to have
 
-mem_per_node = 96-20     # the available memory on a compute node to target for use, minus some leeway
-threads_per_node = 68*4 # the number of available threads to be used on a given node
+mem_per_node = 198-40     # the available memory on a compute node to target for use, minus some leeway
+threads_per_node = 64*4 # the number of available threads to be used on a given node
 
 print("parsl-bundle: Bundling first pass...")
 bundle_list_a = jbu.determine_bundles(worklist_a, mem_per_thread, mem_per_instance, mem_per_node, threads_per_node)
@@ -43,7 +43,7 @@ jbu.check_job_success(bundles, outpath, restartpath)
 print("parsl-bundle: restart path is: {}".format(restartpath))
 
 print("parsl-bundle: Determining remaining jobs...")
-worklist_new = jbu.determine_remaining_jobs("/global/cscratch1/sd/descim/Run2.2i/DESC_DC2_imSim_Workflow/empty-worklist.json", restartpath)
+worklist_new = jbu.determine_remaining_jobs("/projects/LSSTsky/Run3.0i/DESC_DC2_imSim_Workflow/empty-worklist.json", restartpath)
 
 print("parsl-bundle: worklist_new has length {}".format(len(worklist_new)))
 if len(worklist_new) > 0:

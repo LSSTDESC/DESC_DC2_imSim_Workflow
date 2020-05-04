@@ -14,7 +14,7 @@ def determine_instcat_work(instcat_list, outfile):
           outfile (str): path and name of where you want the master list to be written.
     """
     #db = ProgressDB() # connect to the database in order to start storing information about work.
-    run20_region = trim_sensors.Run20Region()
+    run20_region = trim_sensors.Run20Region(ra_mid=53.125, ne_corner=(53.764, -27.533), dec_range=(-28.667, -27.533))
     #instcat_list = [os.path.abspath(instcat_file) for instcat_file in instcat_list]
     sensors_list = [run20_region.trim_sensors(instcat) for instcat in instcat_list]
     work_data = [ [instcat, sensors] for (instcat, sensors) in zip(instcat_list, sensors_list)]
