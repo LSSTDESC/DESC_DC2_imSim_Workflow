@@ -9,12 +9,16 @@ jobs:
     name: dc2-imsim release
     runs-on: ubuntu-18.04
     steps:
+      - name: Check Disk Space
+        run: df -h && sudo apt-get clean && df -h 
       - name: Docker login
         run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username heather999 --password-stdin
       - name: checkout desc_dc2_imsim_workflow
         uses: actions/checkout@v1
         with:
           fetch-depth: 1
+      - name : Docker prune
+        run: sudo docker system prune && df -h 
       - name: Get the tag
         id: get_tag
         run: echo ::set-output name=DOCKTAG::${GITHUB_REF/refs\/tags\//}
