@@ -8,13 +8,15 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Check Disk Space
-        run: df -h 
+        run: df -h && sudo apt-get clean && df -h 
       - name: Docker login
         run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username heather999 --password-stdin
       - name: checkout desc_dc2_imsim_workflow 
         uses: actions/checkout@v1
         with:
           fetch-depth: 1
+      - name : Docker prune
+        run: sudo docker system prune && df -h 
       - name: do docker build
         run: docker build --no-cache -t lsstdesc/dc2-imsim:latest -f $GITHUB_WORKSPACE/Dockerfile . 
       - name: Docker push
