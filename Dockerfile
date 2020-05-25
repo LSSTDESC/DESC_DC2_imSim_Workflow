@@ -16,7 +16,7 @@ RUN set +e &&\
   git clone https://github.com/LSSTDESC/DESC_DC2_imSim_Workflow.git &&\
   setup -r imSim -j &&\
   cd imSim &&\
-  git checkout DC2-Run3.0i-rc &&\
+  git checkout v1.0.0 &&\
   scons &&\
   cd ../DESC_DC2_imSim_Workflow &&\
   git checkout Run2.2i-production-v2
