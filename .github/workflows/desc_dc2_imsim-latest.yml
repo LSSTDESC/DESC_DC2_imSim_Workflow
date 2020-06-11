@@ -1,6 +1,9 @@
 name: desc_dc2_imsim_workflow latest
 
-on: [push]
+on:
+  push:
+    branches: 
+      - master
 
 jobs:
   build:
